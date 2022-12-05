@@ -1,6 +1,5 @@
-import {useState} from "react";
+import { useState, useEffect } from "react";
 import Chessboard from "chessboardjsx";
-import { Chess } from "chess.js"; // import Chess from  "chess.js"(default) if recieving an error about new Chess() not being a constructor
 import io from 'socket.io-client';
 
 
@@ -19,21 +18,23 @@ import io from 'socket.io-client';
 //   });
 // }, [socket])
 
-const game = new Chess();
 const socket = io.connect("http://localhost:3001");
 
 function App() {
 
   const [position, setPosition] = useState("start");
 
-  const handleMove = ({ sourceSquare, targetSquare }) => {
-    const move = game.move({ from: sourceSquare, to: targetSquare });
-    // illegal move
-    console.log(move);
-    if (move === null) return;
-    setPosition(game.fen())
+  const sendMove = (onDrop) => {
+    socket.emit("move", onDrop)
+    console.log(onDrop);
   }
 
+  useEffect(() => {
+    socket.on("receive_move", (move) => {
+      if (move === null) return;
+      setPosition(move);
+    });
+  }, [socket])
 
   return (
     <div style={boardsContainer}>
@@ -41,7 +42,7 @@ function App() {
         id="board!"
         position={position}
         width={320}
-        onDrop={handleMove}
+        onDrop={sendMove}
         boardStyle={boardStyle}
         orientation="white"
       />

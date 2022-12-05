@@ -18,9 +18,7 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
     console.log('User Connected: ' + socket.id);
-    chatLog = [];
     socket.on("send_message", (data) => {
-        chatLog.push(data.message);
         io.emit("receive_message", chatLog);
     });
 });

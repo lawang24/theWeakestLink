@@ -4,12 +4,11 @@ const app = express();
 const http = require("http");
 const { Server } = require('socket.io');
 const cors = require("cors");
-const { createDiffieHellmanGroup } = require('crypto');
 app.use(cors());
 const server = http.createServer(app)
 
 var moves = [];
-let numberPlayers = 2;
+let numberPlayers = 0;
 let whiteTurn = true ;
 
 function chooseWeakest(moves) {
@@ -53,10 +52,16 @@ io.on("connection", (socket) => {
         }
     });
 
-    socket.on("join_team", (data) =>{
+    socket.on("join_room", (data) =>{
         socket.join(data);
+        console.log("joined room "+data);
     });
 
+    socket.on("new_room", () =>{
+        socket.join(); // figure out how to create a random four letter code
+        io.emit()
+    });
+    
 });
 
 server.listen(3001, () => {

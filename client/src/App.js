@@ -1,15 +1,13 @@
-import Chessboard from "chessboardjsx";
 import io from 'socket.io-client';
+import { useState, Component } from "react";
 import { Chess } from "chess.js";
-import { Component } from "react";
-import PropTypes from "prop-types";
-
+import Chessboard from "chessboardjsx";
 
 const STOCKFISH = window.STOCKFISH;
 const socket = io.connect("http://localhost:3001");
 const game = new Chess();
 
-class App extends Component {
+class Game extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -41,6 +39,7 @@ class App extends Component {
     socket.emit("join_team", team);
     this.setState({ team: team });
   }
+
 
   onDrop = ({ sourceSquare, targetSquare }) => {
     if (!this.state.turn) return;
@@ -111,26 +110,20 @@ class App extends Component {
     };
   };
 
-  // useEffect(() => {
-  //   socket.on("receive_move", (move) => {
-  //     if (move === null) return;
-  //     setPosition(move);
-  //   });
-  // }, [socket])
 
   render() {
 
     let status = (this.state.turn ? "Your" : "Not Your")
-   
+
     let team;
-    switch (this.state.team){
+    switch (this.state.team) {
       case "white":
         team = "White"
         break;
       case "black":
         team = "Black"
         break;
-      default :
+      default:
         team = "Spectating"
     }
 
@@ -153,6 +146,56 @@ class App extends Component {
   }
 }
 
+function JoinRoom({ joinRoom, roomCode, setRoomCode, newRoom }) {
+
+  return (
+    <div>
+      <form onSubmit={joinRoom}>
+        <h1>Join Current Lobby</h1>
+        <input
+          type="text"
+          placeholder="Enter Code Here"
+          value={roomCode}
+          onChange={(e) => setRoomCode(e.target.value)}
+        />
+        <button type="submit">Submit</button>
+      </form>
+
+      <form onSubmit={newRoom}>
+        <h1>Create New Lobby</h1>
+        <button type="submit">Create</button>
+      </form>
+    </div>
+  );
+};
+
+function App() {
+  const [isInRoom, setInRoom] = useState(false);
+  const [roomCode, setRoomCode] = useState("");
+
+  const joinRoom = () => {
+    socket.emit("join_room", roomCode);
+    setInRoom(true);
+  }
+
+  const newRoom = () => {
+    socket.emit("new_room");
+    setInRoom(true);
+  }
+
+
+  return (
+    <div style={{ display: 'block', justifyContent: "center", alignItems: 'center', height: "100vh" }}>
+      <h1>The Weakest Link</h1>
+      {!isInRoom &&
+        <JoinRoom joinRoom={joinRoom}
+          roomCode={roomCode}
+          setRoomCode={setRoomCode}
+          newRoom={newRoom} />}
+      {isInRoom && <Game />}
+    </div>
+  );
+}
 export default App;
 
 const boardsContainer = {

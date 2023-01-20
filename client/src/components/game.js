@@ -1,55 +1,52 @@
 import Chessboard from "chessboardjsx";
-import io from 'socket.io-client';
-import { Chess } from "chess.js";
 import { Component } from "react";
 
 const STOCKFISH = window.STOCKFISH;
-const socket = io.connect("http://localhost:3001");
-const game = new Chess();
 
 class Game extends Component {
   constructor(props) {
     super(props);
     this.state = {
       fen: "start",
-      turn: true,
-      team: "none"
+      turn: false,
+      team: "none",
     };
     this.sendRating = this.sendRating.bind(this);
     this.onDrop = this.onDrop.bind(this);
     this.joinTeam = this.joinTeam.bind(this);
   };
 
+
   componentDidMount() {
-    socket.on("weakest_position", (weakest) => {
+    this.props.socket.on("weakest_position", (weakest) => {
       this.setState({ fen: weakest });
-      game.load(weakest);
+      this.props.game.load(weakest);
     });
-    socket.on("play", () => {
-      this.setState({ turn: true });
+    this.props.socket.on("nextTurn", (whiteTurn) => {
+      if (this.state.team === "white") this.setState({ turn: whiteTurn });
+      if (this.state.team === "black") this.setState({ turn: !whiteTurn });
     });
   };
 
   sendRating = (rating, position) => {
-    socket.emit("player_move", ({ rating: rating, position: position }));
-    this.setState({ turn: false });
+    this.props.socket.emit("player_move", ({ rating: rating, position: position, roomCode: this.props.roomCode }));
   };
 
   joinTeam = (team) => {
-    socket.emit("join_team", team);
+    this.props.socket.emit("join_team", team);
     this.setState({ team: team });
   }
-  
+
 
   onDrop = ({ sourceSquare, targetSquare }) => {
     if (!this.state.turn) return;
-    const move = game.move({ from: sourceSquare, to: targetSquare })
+    const move = this.props.game.move({ from: sourceSquare, to: targetSquare })
     if (move === null) return; // illegal move  
 
     // grab player proposed position and show it
-    this.setState({ fen: game.fen() })
+    this.setState({ fen: this.props.game.fen() })
 
-    game.undo();
+    this.props.game.undo();
 
     return new Promise((resolve) => {
       resolve();
@@ -70,13 +67,13 @@ class Game extends Component {
       if (announced_game_over) {
         return;
       }
-      if (game.isGameOver()) {
+      if (this.props.game.isGameOver()) {
         announced_game_over = true;
       }
     }, 500);
 
     const evalMove = () => {
-      if (!game.isGameOver()) {
+      if (!this.props.game.isGameOver()) {
         engine.postMessage("ucinewgame");
         engine.postMessage("position fen " + this.state.fen);
         engine.postMessage("eval");
@@ -110,21 +107,25 @@ class Game extends Component {
     };
   };
 
- 
+
   render() {
 
     let status = (this.state.turn ? "Your" : "Not Your")
-   
+
     let team;
-    switch (this.state.team){
+    switch (this.state.team) {
       case "white":
         team = "White"
         break;
       case "black":
         team = "Black"
         break;
-      default :
+      default:
         team = "Spectating"
+    }
+    
+    const startGame = (isHost) => {
+      if (isHost) return (<button onClick = {this.props.socket.emit("start_game")}>Start</button>);
     }
 
     return (
@@ -135,12 +136,14 @@ class Game extends Component {
           width={320}
           onDrop={this.onDrop}
           boardStyle={boardStyle}
-          orientation="white"
+          orientation={this.state.team}
         />
         <button value="white" onClick={e => this.joinTeam(e.target.value, true)} >Join White Team</button>
         <button value="black" onClick={e => this.joinTeam(e.target.value, false)} >Join Black Team</button>
+        <div>{startGame(this.props.host)}</div>
         <h1>{team} Player</h1>
         <h1>{status} Turn </h1>
+        
       </div>
     );
   }

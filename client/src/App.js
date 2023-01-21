@@ -7,6 +7,8 @@ import JoinRoom from "./components/JoinRoom"
 const socket = io("http://localhost:3001");
 const game = new Chess();
 
+
+
 function App() {
   const [isInRoom, setInRoom] = useState(false);
   const [roomCode, setRoomCode] = useState("");
@@ -38,8 +40,7 @@ function App() {
   }, []);
 
   return (
-    <div style={{ display: 'block', justifyContent: "center", alignItems: 'center', height: "100vh" }}>
-      <h1>The Weakest Link</h1>
+    <div>
       {!isInRoom &&
         <JoinRoom
           joinRoom={joinRoom}
@@ -51,12 +52,11 @@ function App() {
         game={game}
         roomCode={roomCode}
         host={host}
-         />}
-      <h1>Roomcode: {roomCode}</h1>
-    </div>
+      />}
+      </div>
   );
 }
 export default App;
 
 
-  
+

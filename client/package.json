@@ -14,6 +14,7 @@
     "socket.io-client": "^4.5.4",
     "stockfish": "^15.0.0",
     "stockfish-nnue.wasm": "^1.0.0-1946a675.smolnet",
+    "styled-components": "^5.3.6",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -39,5 +40,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "overrides": {
+    "styled-components": "^5"
   }
 }

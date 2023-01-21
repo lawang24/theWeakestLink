@@ -1,7 +1,13 @@
 import Chessboard from "chessboardjsx";
 import { Component } from "react";
+import {Wrapper} from "../StyledComponents";
+import styled from "styled-components";
 
 const STOCKFISH = window.STOCKFISH;
+
+const GameWrapper = styled(Wrapper)`
+flex-flow:column-reverse wrap-reverse;
+`;
 
 class Game extends Component {
   constructor(props) {
@@ -129,33 +135,29 @@ class Game extends Component {
     }
 
     return (
-      <div style={boardsContainer} >
+      <GameWrapper>
+      <div>
         <Chessboard
           id="board!"
           position={this.state.fen}
-          width={320}
+          width={this.calcWidth}
           onDrop={this.onDrop}
           boardStyle={boardStyle}
           orientation={this.state.team}
         />
+        </div>
         <button value="white" onClick={e => this.joinTeam(e.target.value, true)} >Join White Team</button>
         <button value="black" onClick={e => this.joinTeam(e.target.value, false)} >Join Black Team</button>
         <div>{startGame(this.props.host)}</div>
         <h1>{team} Player</h1>
         <h1>{status} Turn </h1>
-        
-      </div>
+      </GameWrapper>
     );
   }
 }
 
 export default Game;
 
-const boardsContainer = {
-  display: "flex",
-  justifyContent: "space-evenly",
-  alignItems: "center"
-};
 const boardStyle = {
   borderRadius: "5px",
   boxShadow: `0 5px 15px rgba(0, 0, 0, 0.5)`

@@ -1,12 +1,47 @@
 import Chessboard from "chessboardjsx";
-import { Component } from "react";
-import {Wrapper} from "../StyledComponents";
+import { React, Component } from "react";
+import { Wrapper } from "../StyledComponents";
 import styled from "styled-components";
+import { Logo, SettingButton, Button } from "../StyledComponents"
+
 
 const STOCKFISH = window.STOCKFISH;
 
+
 const GameWrapper = styled(Wrapper)`
-flex-flow:column-reverse wrap-reverse;
+flex-flow:row-reverse;
+justify-content:space-evenly;
+`;
+
+const RoomCode = styled(Button)`
+width:34%;
+height:56px;
+margin-left:10%;
+background:#868BAC;
+`;
+
+const TeamButton = styled(Button)`
+height:50%;
+width: 50%;
+border: 3px solid rgba(151, 154, 175, 0.93);
+background:${props => props.team ? "#E6E6E6" : "#939393"};
+color:${props => props.team ? "#979AAF" : "#FFFFFF"};
+margin:0;
+`;
+
+const TeamName = styled.h2`
+display:flex;
+height:50%;
+width:50%;
+justify-content:center;
+align-items:center;
+margin:0;
+font-family: 'Montserrat';
+font-style: normal;
+font-weight: 700;
+font-size: 18px;
+line-height: 40px;
+color:${props => props.color ? "#E6E6E6" : "#939393"};
 `;
 
 class Game extends Component {
@@ -21,7 +56,6 @@ class Game extends Component {
     this.onDrop = this.onDrop.bind(this);
     this.joinTeam = this.joinTeam.bind(this);
   };
-
 
   componentDidMount() {
     this.props.socket.on("weakest_position", (weakest) => {
@@ -42,7 +76,6 @@ class Game extends Component {
     this.props.socket.emit("join_team", team);
     this.setState({ team: team });
   }
-
 
   onDrop = ({ sourceSquare, targetSquare }) => {
     if (!this.state.turn) return;
@@ -129,28 +162,51 @@ class Game extends Component {
       default:
         team = "Spectating"
     }
-    
+
     const startGame = (isHost) => {
-      if (isHost) return (<button onClick = {this.props.socket.emit("start_game")}>Start</button>);
+      if (isHost) return (<button onClick={this.props.socket.emit("start_game")}>Start</button>);
     }
 
     return (
       <GameWrapper>
-      <div>
+
         <Chessboard
           id="board!"
           position={this.state.fen}
-          width={this.calcWidth}
           onDrop={this.onDrop}
           boardStyle={boardStyle}
           orientation={this.state.team}
+          calcWidth={(screen) => screen.screenHeight * .9}
         />
+
+        <div style={{ display: "flex", "flex-direction": 'column', "justify-content": "space-between", height: "100vh", width: "33vw" }}>
+
+          <Logo style={{ width: "50%", height: "auto" }}></Logo>
+
+
+          <section id="gameplay" style={{
+            "display": "flex", "flex-flow": "column", "justify-content": "center", "align-items": "center", height: "70vh"
+          }}>
+            <div style={{ display: "flex", "flex-flow": "row wrap", "justify-content": "center", width: "50%", height: "25%" }}>
+              <TeamName color="white">WHITE</TeamName>
+              <TeamName>BLACK</TeamName>
+              <TeamButton team="white" value="white" onClick={e => this.joinTeam(e.target.value, true)} >JOIN</TeamButton>
+              <TeamButton value="black" onClick={e => this.joinTeam(e.target.value, false)} >JOIN</TeamButton>
+            </div>
+
+
+            <div>{startGame(this.props.host)}</div>
+            <h1>{team} Player</h1>
+            <h1>{status} Turn </h1>
+          </section>
+
+
+          <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justify-content': 'start' }}>
+            <SettingButton style={{ height: "48px", width: "48px", }}></SettingButton>
+            <RoomCode>ROOM: {this.props.roomCode}</RoomCode>
+          </section>
+
         </div>
-        <button value="white" onClick={e => this.joinTeam(e.target.value, true)} >Join White Team</button>
-        <button value="black" onClick={e => this.joinTeam(e.target.value, false)} >Join Black Team</button>
-        <div>{startGame(this.props.host)}</div>
-        <h1>{team} Player</h1>
-        <h1>{status} Turn </h1>
       </GameWrapper>
     );
   }
@@ -159,6 +215,9 @@ class Game extends Component {
 export default Game;
 
 const boardStyle = {
-  borderRadius: "5px",
-  boxShadow: `0 5px 15px rgba(0, 0, 0, 0.5)`
+  border: "10px solid #868BAC",
+  boxShadow: `0 5px 15px rgba(0, 0, 0, 0.5)`,
+  "border-radius": "5px",
+  position: "relative",
+  left: "3%"
 };

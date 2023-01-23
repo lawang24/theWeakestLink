@@ -1,4 +1,7 @@
 import styled from 'styled-components';
+import logo from '../logo.png';
+import gear from '../settingGear.png';
+
 
 export const Wrapper = styled.div`
 display:flex;
@@ -18,3 +21,6 @@ width:100%;
 font-size:18px;
 border-radius: 3px;
 `;
+
+export const Logo = (props) => <img style = {props.style} src={logo} alt="logo" />
+export const SettingButton = (props) => <img style = {props.style} src={gear} alt="settings" />

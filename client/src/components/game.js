@@ -50,31 +50,33 @@ class Game extends Component {
     this.state = {
       fen: "start",
       turn: false,
-      team: "none",
     };
     this.sendRating = this.sendRating.bind(this);
     this.onDrop = this.onDrop.bind(this);
-    this.joinTeam = this.joinTeam.bind(this);
+    this.changeTeam = this.changeTeam.bind(this);
   };
+
 
   componentDidMount() {
     this.props.socket.on("weakest_position", (weakest) => {
       this.setState({ fen: weakest });
       this.props.game.load(weakest);
     });
-    this.props.socket.on("nextTurn", (whiteTurn) => {
-      if (this.state.team === "white") this.setState({ turn: whiteTurn });
-      if (this.state.team === "black") this.setState({ turn: !whiteTurn });
+    this.props.socket.on("nextTurn", (isWhiteTurn) => {
+      if (this.props.isWhite) this.setState({ turn: isWhiteTurn });
+      else this.setState({ turn: !isWhiteTurn });
     });
   };
 
   sendRating = (rating, position) => {
-    this.props.socket.emit("player_move", ({ rating: rating, position: position, roomCode: this.props.roomCode }));
+    this.props.socket.emit("send_rating", rating, position, this.props.roomCode, this.props.isWhite );
   };
 
-  joinTeam = (team) => {
-    this.props.socket.emit("join_team", team);
-    this.setState({ team: team });
+  changeTeam = (desiredTeam) => {
+    if (desiredTeam !== this.props.isWhite) {
+      this.props.socket.emit("change_team", this.props.isWhite, this.props.roomCode, this.props.username);
+      this.props.setisWhite(desiredTeam)
+    }
   }
 
   onDrop = ({ sourceSquare, targetSquare }) => {
@@ -151,21 +153,11 @@ class Game extends Component {
 
     let status = (this.state.turn ? "Your" : "Not Your")
 
-    let team;
-    switch (this.state.team) {
-      case "white":
-        team = "White"
-        break;
-      case "black":
-        team = "Black"
-        break;
-      default:
-        team = "Spectating"
-    }
-
     const startGame = (isHost) => {
       if (isHost) return (<button onClick={this.props.socket.emit("start_game")}>Start</button>);
     }
+
+    let team = this.props.isWhite ? "white" : "black"
 
     return (
       <GameWrapper>
@@ -175,7 +167,7 @@ class Game extends Component {
           position={this.state.fen}
           onDrop={this.onDrop}
           boardStyle={boardStyle}
-          orientation={this.state.team}
+          orientation={team}
           calcWidth={(screen) => screen.screenHeight * .9}
         />
 
@@ -190,16 +182,13 @@ class Game extends Component {
             <div style={{ display: "flex", "flex-flow": "row wrap", "justify-content": "center", width: "50%", height: "25%" }}>
               <TeamName color="white">WHITE</TeamName>
               <TeamName>BLACK</TeamName>
-              <TeamButton team="white" value="white" onClick={e => this.joinTeam(e.target.value, true)} >JOIN</TeamButton>
-              <TeamButton value="black" onClick={e => this.joinTeam(e.target.value, false)} >JOIN</TeamButton>
+              <TeamButton team="white" onClick={e => this.changeTeam(true)} >JOIN</TeamButton>
+              <TeamButton onClick={e => this.changeTeam(false)} >JOIN</TeamButton>
             </div>
-
-
             <div>{startGame(this.props.host)}</div>
-            <h1>{team} Player</h1>
+            <h1>{this.props.isWhite ? "White" : "Black"} Player</h1>
             <h1>{status} Turn </h1>
           </section>
-
 
           <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justify-content': 'start' }}>
             <SettingButton style={{ height: "48px", width: "48px", }}></SettingButton>
@@ -219,5 +208,5 @@ const boardStyle = {
   boxShadow: `0 5px 15px rgba(0, 0, 0, 0.5)`,
   "border-radius": "5px",
   position: "relative",
-  left: "3%"
+  left: "5%"
 };

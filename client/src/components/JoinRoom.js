@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Logo, Wrapper, Button } from "../StyledComponents"
+import { Logo, Wrapper, Button, Arrow } from "../StyledComponents"
 import { useState } from 'react';
 
 const Description = styled.h2`
@@ -22,6 +22,7 @@ height:28vh;
 width:35vw;
 box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 border-radius: 15px;
+position:relative;
 `;
 
 const Form = styled.form`
@@ -61,11 +62,26 @@ const NewRoom = styled(Button)`
 height:42%;
 `;
 
+const BackButton = styled.form`
+display:flex;
+justify-content: center;
+position: absolute;
+top: 7%;
+left: 0;
+height:20%;
+width:20%;.
+`;
 
-const UsernamePortal = ({ isCreatingRoom, username, setUsername, joinRoom, newRoom }) => {
+
+const UsernamePortal = ({ isCreatingRoom, username, setUsername, joinRoom, newRoom,setisCreatingRoom,setisHomescreen }) => {
   const handleSubmit = isCreatingRoom ? newRoom : joinRoom;
   return (
     <ControlPanelStyle>
+      <BackButton onSubmit={()=>{
+        setisCreatingRoom(false); setisHomescreen(true)}
+      }>
+        <Arrow style={{ transform: "rotate(180deg)" }} />
+      </BackButton>
       <Form onSubmit={handleSubmit}>
         <RoomCode
           type="text"
@@ -79,7 +95,7 @@ const UsernamePortal = ({ isCreatingRoom, username, setUsername, joinRoom, newRo
   )
 };
 
-const MainLobbyPortal = ({ roomCode, setRoomCode, setcreateRoom, setisHomescreen,isRoomValid }) => {
+const MainLobbyPortal = ({ roomCode, setRoomCode, setisCreatingRoom, setisHomescreen, isRoomValid }) => {
 
   return (
     <ControlPanelStyle>
@@ -94,7 +110,7 @@ const MainLobbyPortal = ({ roomCode, setRoomCode, setcreateRoom, setisHomescreen
       </Form>
       <HR></HR>
       <Form onSubmit={() => {
-        setcreateRoom(true); setisHomescreen(false);
+        setisCreatingRoom(true); setisHomescreen(false);
       }}>
         <NewRoom type="submit">NEW ROOM</NewRoom>
       </Form>
@@ -103,15 +119,18 @@ const MainLobbyPortal = ({ roomCode, setRoomCode, setcreateRoom, setisHomescreen
   )
 }
 
-function JoinRoom({joinRoom, roomCode, setRoomCode, newRoom, username, setUsername,isHomescreen,setisHomescreen,isRoomValid }) {
-  const [createRoom, setcreateRoom] = useState(false);
+function JoinRoom({ joinRoom, roomCode, setRoomCode, newRoom, username, setUsername, isHomescreen, setisHomescreen, isRoomValid }) {
+  const [isCreatingRoom, setisCreatingRoom] = useState(false);
   return (
     <Wrapper>
       <Logo style={{ height: "20%", width: "auto" }}></Logo>
       <Description>A TEAM-BASED CHESS GAME</Description>
       {isHomescreen ?
-        <MainLobbyPortal roomCode={roomCode} setRoomCode={setRoomCode} setcreateRoom={setcreateRoom} setisHomescreen={setisHomescreen} isRoomValid={isRoomValid} /> :
-        <UsernamePortal joinRoom={joinRoom} newRoom={newRoom} isCreatingRoom={createRoom} username={username} setUsername={setUsername} />
+        <MainLobbyPortal roomCode={roomCode} setRoomCode={setRoomCode} setisCreatingRoom={setisCreatingRoom}
+         setisHomescreen={setisHomescreen} isRoomValid={isRoomValid} /> :
+        <UsernamePortal joinRoom={joinRoom} newRoom={newRoom} isCreatingRoom={isCreatingRoom} 
+        setisCreatingRoom={setisCreatingRoom} setisHomescreen={setisHomescreen}
+        username={username} setUsername={setUsername} />
       }
     </Wrapper>
   );

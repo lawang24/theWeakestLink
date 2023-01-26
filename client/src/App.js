@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { Chess } from "chess.js";
 import Game from "./components/game"
 import JoinRoom from "./components/JoinRoom"
+import './App.css'
+import { Wrapper } from './StyledComponents';
 
 const socket = io("http://localhost:3001");
 const game = new Chess();
@@ -13,6 +15,7 @@ function App() {
   const [host, setHost] = useState(false);
   const [username, setUsername] = useState("");
   const [isHomescreen, setisHomescreen] = useState(true);
+  const [isWhite, setisWhite] = useState(true);
 
   const isRoomValid = (event) => {
     event.preventDefault();
@@ -32,9 +35,10 @@ function App() {
   };
 
   useEffect(() => {
-    socket.on("room_joined", (roomCode) => {
+    socket.on("room_joined", (roomCode,isWhite) => {
       setRoomCode(roomCode);
       setInRoom(true);
+      setisWhite(isWhite);
     })
     socket.on("room_code", (roomCode) => {
       setRoomCode(roomCode);
@@ -44,10 +48,9 @@ function App() {
   }, []);
 
   return (
-    <div>
+    <Wrapper>
       {!isInRoom &&
         <JoinRoom
-          socket={socket}
           joinRoom={joinRoom}
           roomCode={roomCode}
           setRoomCode={setRoomCode}
@@ -63,8 +66,11 @@ function App() {
         game={game}
         roomCode={roomCode}
         host={host}
+        isWhite={isWhite}
+        setisWhite={setisWhite}
+        username={username}
       />}
-    </div>
+    </Wrapper>
   );
 }
 export default App;

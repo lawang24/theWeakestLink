@@ -97,6 +97,8 @@ io.on("connection", (socket) => {
         socket.join(roomCode);
         newPlayer(roomCode, username)
         socket.emit("room_joined", roomCode, isWhite);
+        // io.to(roomCode).emit("update_players",rooms.get(roomCode).players)
+        console.log(rooms.get(roomCode).players);
     });
 
     socket.on("is_room_valid?", (roomCode) => {
@@ -112,7 +114,9 @@ io.on("connection", (socket) => {
         const teams = rooms.get(roomCode).players;
         const newTeam = isWhite ? 1 : 0;
         teams[newTeam].push(username);
-        console.log(rooms.get(roomCode));
+        console.log(rooms.get(roomCode).players);
+        console.log(`the teams are ${JSON.stringify(teams)}`)
+        io.to(roomCode).emit("update_players",JSON.stringify(teams));
     });
 
 });

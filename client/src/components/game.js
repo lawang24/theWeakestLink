@@ -44,18 +44,28 @@ line-height: 40px;
 color:${props => props.color ? "#E6E6E6" : "#939393"};
 `;
 
+const Teams = ({players,isWhite}) =>{
+ 
+  console.log(players);
+  const team = isWhite? 0:1;
+
+  if (Object.keys(players).length === 0) return;
+  else return(
+    <ul>
+      {players[team].map((player,i) => <li key = {i}> {player} </li>)}
+    </ul>
+  )
+}
+
 class Game extends Component {
   constructor(props) {
     super(props);
     this.state = {
       fen: "start",
       turn: false,
-    };
-    this.sendRating = this.sendRating.bind(this);
-    this.onDrop = this.onDrop.bind(this);
-    this.changeTeam = this.changeTeam.bind(this);
+      players: {}
+    }
   };
-
 
   componentDidMount() {
     this.props.socket.on("weakest_position", (weakest) => {
@@ -65,6 +75,14 @@ class Game extends Component {
     this.props.socket.on("nextTurn", (isWhiteTurn) => {
       if (this.props.isWhite) this.setState({ turn: isWhiteTurn });
       else this.setState({ turn: !isWhiteTurn });
+    });
+    this.props.socket.on("update_players", (teams) => {
+      console.log(`I am receiving ${teams} as teams`)
+      let newTeams = JSON.parse(teams);
+      console.log(typeof newTeams);
+      console.log( newTeams);
+      this.setState({ players: newTeams }); // it is this one
+      console.log(this.state.players);
     });
   };
 
@@ -154,14 +172,13 @@ class Game extends Component {
     let status = (this.state.turn ? "Your" : "Not Your")
 
     const startGame = (isHost) => {
-      if (isHost) return (<button onClick={this.props.socket.emit("start_game")}>Start</button>);
+      if (isHost) return (<button onClick={()=>this.props.socket.emit("start_game")}>Start</button>);
     }
 
     let team = this.props.isWhite ? "white" : "black"
 
     return (
       <GameWrapper>
-
         <Chessboard
           id="board!"
           position={this.state.fen}
@@ -188,6 +205,7 @@ class Game extends Component {
             <div>{startGame(this.props.host)}</div>
             <h1>{this.props.isWhite ? "White" : "Black"} Player</h1>
             <h1>{status} Turn </h1>
+            <Teams players = {this.state.players} isWhite = {true}/>
           </section>
 
           <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justify-content': 'start' }}>

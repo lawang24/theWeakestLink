@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import logo from '../logo.png';
-import gear from '../settingGear.png';
-import arrow from '../arrow.png';
+import logo from '../images/logo.png';
+import gear from '../images/settingGear.png';
+import arrow from '../images/arrow.png';
 
 export const Wrapper = styled.div`
 display:flex;

@@ -1,60 +1,22 @@
 import Chessboard from "chessboardjsx";
 import { React, Component } from "react";
-import { Wrapper } from "../StyledComponents";
 import styled from "styled-components";
-import { Logo, SettingButton, Button } from "../StyledComponents"
-
+import { Logo, SettingButton } from "../StyledComponents"
+import { GameWrapper, RoomCode, ChangeTeam, TeamName, TeamsStyled,StartGame } from "../StyledComponents/gameComponents"
+import tower from "../images/tower_white.png"
 
 const STOCKFISH = window.STOCKFISH;
 
-
-const GameWrapper = styled(Wrapper)`
-flex-flow:row-reverse;
-justify-content:space-evenly;
-`;
-
-const RoomCode = styled(Button)`
-width:34%;
-height:56px;
-margin-left:10%;
-background:#868BAC;
-`;
-
-const TeamButton = styled(Button)`
-height:50%;
-width: 50%;
-border: 3px solid rgba(151, 154, 175, 0.93);
-background:${props => props.team ? "#E6E6E6" : "#939393"};
-color:${props => props.team ? "#979AAF" : "#FFFFFF"};
-margin:0;
-`;
-
-const TeamName = styled.h2`
-display:flex;
-height:50%;
-width:50%;
-justify-content:center;
-align-items:center;
-margin:0;
-font-family: 'Montserrat';
-font-style: normal;
-font-weight: 700;
-font-size: 18px;
-line-height: 40px;
-color:${props => props.color ? "#E6E6E6" : "#939393"};
-`;
-
-const Teams = ({players,isWhite}) =>{
- 
-  console.log(players);
-  const team = isWhite? 0:1;
+const Teams = ({ players, isWhite }) => {
+  const team = isWhite ? 0 : 1;
+  const color = isWhite ? "#FFFFFF" : "#000000";
 
   if (Object.keys(players).length === 0) return;
-  else return(
-    <ul>
-      {players[team].map((player,i) => <li key = {i}> {player} </li>)}
+  else return (
+    <ul style={{listStyle: `url(${tower})`,listStyleType:"square"}}>
+    {players[team].map((player, i) => <li style={{ color: color }} key={i}> {player} </li>)}
     </ul>
-  )
+    )
 }
 
 class Game extends Component {
@@ -77,25 +39,19 @@ class Game extends Component {
       else this.setState({ turn: !isWhiteTurn });
     });
     this.props.socket.on("update_players", (teams) => {
-      console.log(`I am receiving ${teams} as teams`)
       let newTeams = JSON.parse(teams);
-      console.log(typeof newTeams);
-      console.log( newTeams);
       this.setState({ players: newTeams }); // it is this one
-      console.log(this.state.players);
     });
   };
 
   sendRating = (rating, position) => {
-    this.props.socket.emit("send_rating", rating, position, this.props.roomCode, this.props.isWhite );
+    this.props.socket.emit("send_rating", rating, position, this.props.roomCode, this.props.isWhite);
   };
 
-  changeTeam = (desiredTeam) => {
-    if (desiredTeam !== this.props.isWhite) {
+  changeTeam = () => {
       this.props.socket.emit("change_team", this.props.isWhite, this.props.roomCode, this.props.username);
-      this.props.setisWhite(desiredTeam)
+      this.props.setisWhite(!this.props.isWhite);
     }
-  }
 
   onDrop = ({ sourceSquare, targetSquare }) => {
     if (!this.state.turn) return;
@@ -172,7 +128,7 @@ class Game extends Component {
     let status = (this.state.turn ? "Your" : "Not Your")
 
     const startGame = (isHost) => {
-      if (isHost) return (<button onClick={()=>this.props.socket.emit("start_game")}>Start</button>);
+      if (isHost) return (<StartGame onClick={() => this.props.socket.emit("start_game")}>Start</StartGame>);
     }
 
     let team = this.props.isWhite ? "white" : "black"
@@ -185,28 +141,37 @@ class Game extends Component {
           onDrop={this.onDrop}
           boardStyle={boardStyle}
           orientation={team}
-          calcWidth={(screen) => screen.screenHeight * .9}
+          calcWidth={(screen) => Math.min(screen.screenHeight * .9, screen.screenWidth * .53)}
         />
 
         <div style={{ display: "flex", "flex-direction": 'column', "justify-content": "space-between", height: "100vh", width: "33vw" }}>
 
           <Logo style={{ width: "50%", height: "auto" }}></Logo>
-
+          
 
           <section id="gameplay" style={{
             "display": "flex", "flex-flow": "column", "justify-content": "center", "align-items": "center", height: "70vh"
           }}>
-            <div style={{ display: "flex", "flex-flow": "row wrap", "justify-content": "center", width: "50%", height: "25%" }}>
-              <TeamName color="white">WHITE</TeamName>
-              <TeamName>BLACK</TeamName>
-              <TeamButton team="white" onClick={e => this.changeTeam(true)} >JOIN</TeamButton>
-              <TeamButton onClick={e => this.changeTeam(false)} >JOIN</TeamButton>
+            <div style={{ display: "flex", "flex-flow": "row wrap", "justify-content": "center", height: "25%", width: "100%" }}>
+              <div style={{ display: "flex", flexDirection: "column", width: "50%", alignItems: "center" }}>
+                <TeamName color="white">WHITE</TeamName>
+                <Teams players={this.state.players} isWhite={true} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", width: "50%", alignItems: "center" }}>
+                <TeamName>BLACK</TeamName>
+                <Teams players={this.state.players} isWhite={false} />
+              </div>
             </div>
-            <div>{startGame(this.props.host)}</div>
-            <h1>{this.props.isWhite ? "White" : "Black"} Player</h1>
-            <h1>{status} Turn </h1>
-            <Teams players = {this.state.players} isWhite = {true}/>
+
+            <div style ={{display:"flex",justifyContent:"space-evenly",width:"70%",height:"9%"}}>
+            {startGame(this.props.host)}
+            <ChangeTeam team="white" onClick={e => this.changeTeam(true)} >CHANGE TEAM</ChangeTeam>
+            </div>
+            
           </section>
+
+
+
 
           <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justify-content': 'start' }}>
             <SettingButton style={{ height: "48px", width: "48px", }}></SettingButton>

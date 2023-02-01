@@ -43,7 +43,9 @@ function App() {
     socket.on("room_code", (roomCode) => {
       setRoomCode(roomCode);
     })
-    socket.on("no_room", () => alert("Game Not Found"));
+    socket.on("no_room", () => {
+      alert("Game Not Found"); 
+    });
     socket.on("yes_room", () => setisHomescreen(false));
   }, []);
 

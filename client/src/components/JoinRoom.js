@@ -13,14 +13,12 @@ margin-bottom:30px;
 margin-top:-10px;
 `;
 
-const ControlPanelStyle = styled.div`
+const ControlPanelWrapper = styled.div`
 display:flex;
 flex-direction:row;
-justify-content:space-evenly;
-background-color: #868BAC;
-height:28vh;
-width:35vw;
-box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+justify-content:space-between;
+height:25vh;
+width:39vw;
 border-radius: 15px;
 position:relative;
 `;
@@ -28,17 +26,18 @@ position:relative;
 const Form = styled.form`
 display:flex;
 flex-direction:column;
-width:32%;
+width:68%;
+height:100%;
 justify-content:center;
 align-items:center;
 `;
 
 const RoomCode = styled.input`
 background:#E5E5E5;
-height:20%;
+height:26%;
 width:100%;
 padding: 0;
-margin-bottom:5%;
+margin-bottom:10%;
 border-width: 0;
 font-family: 'Montserrat';
 font-style: normal;
@@ -47,75 +46,107 @@ font-size:18px;
 text-align:center;
 `;
 const JoinButton = styled(Button)`
-height:20%;
+height:26%;
+border-radius:0;
 `;
-const HR = styled.hr`
-width:35%;
-height:0;
-transform: rotate(90deg);
-border: 2px solid #565656;
-align-self:center;
-margin:0 -17%;
-`;
+// const HR = styled.hr`
+// width:35%;
+// height:0;
+// transform: rotate(90deg);
+// border: 2px solid #565656;
+// align-self:center;
+// margin:0 -17%;
+// `;
 
 const NewRoom = styled(Button)`
-height:42%;
+height:47%;
+border-radius:0;
 `;
 
+
+const ControlPanelButton = styled.div`
+display:flex;
+background-color: #868BAC;
+width:46%;
+justify-content:center;
+box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+border-radius: 15px;
+`;
+
+const UsernamePanel = styled(ControlPanelButton)`
+position:relative;
+width:24vw;
+height:25vh;
+justify-content:space-between;
+flex-direction:row;
+align-items:center;
+`
 const BackButton = styled.form`
+position:absolute;
+left:-20%;
 display:flex;
 justify-content: center;
-position: absolute;
-top: 7%;
-left: 0;
-height:20%;
-width:20%;.
+height:15%;
+width:auto.
 `;
 
+const UsernameForm = styled(Form)`
+width:56%;
+margin:0 auto;
+`
 
-const UsernamePortal = ({ isCreatingRoom, username, setUsername, joinRoom, newRoom,setisCreatingRoom,setisHomescreen }) => {
+const UsernameCode = styled(RoomCode)`
+
+`
+
+
+const UsernamePortal = ({ isCreatingRoom, username, setUsername, joinRoom, newRoom, setisCreatingRoom, setisHomescreen }) => {
   const handleSubmit = isCreatingRoom ? newRoom : joinRoom;
   return (
-    <ControlPanelStyle>
-      <BackButton onSubmit={()=>{
-        setisCreatingRoom(false); setisHomescreen(true)}
+    <UsernamePanel>
+      <BackButton onSubmit={() => {
+        setisCreatingRoom(false); setisHomescreen(true)
+      }
       }>
-        <Arrow style={{ transform: "rotate(180deg)" }} />
+        <Arrow style={{}} />
       </BackButton>
-      <Form onSubmit={handleSubmit}>
-        <RoomCode
+      <UsernameForm onSubmit={handleSubmit}>
+        <UsernameCode
           type="text"
           placeholder="USERNAME"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <JoinButton type="submit">ENTER</JoinButton>
-      </Form>
-    </ControlPanelStyle>
+      </UsernameForm>
+    </UsernamePanel>
   )
 };
 
 const MainLobbyPortal = ({ roomCode, setRoomCode, setisCreatingRoom, setisHomescreen, isRoomValid }) => {
 
   return (
-    <ControlPanelStyle>
-      <Form onSubmit={isRoomValid}>
-        <RoomCode
-          type="text"
-          placeholder="ROOM CODE"
-          value={roomCode}
-          onChange={(e) => setRoomCode(e.target.value)}
-        />
-        <JoinButton type="submit">JOIN ROOM</JoinButton>
-      </Form>
-      <HR></HR>
-      <Form onSubmit={() => {
-        setisCreatingRoom(true); setisHomescreen(false);
-      }}>
-        <NewRoom type="submit">NEW ROOM</NewRoom>
-      </Form>
-    </ControlPanelStyle>
-
+    <ControlPanelWrapper>
+      <ControlPanelButton>
+        <Form onSubmit={isRoomValid}>
+          <RoomCode
+            type="text"
+            placeholder="ROOM CODE"
+            value={roomCode}
+            onChange={(e) => setRoomCode(e.target.value)}
+          />
+          <JoinButton type="submit">JOIN ROOM</JoinButton>
+        </Form>
+      </ControlPanelButton>
+      {/* <HR></HR> */}
+      <ControlPanelButton>
+        <Form onSubmit={() => {
+          setisCreatingRoom(true); setisHomescreen(false);
+        }}>
+          <NewRoom type="submit">NEW ROOM</NewRoom>
+        </Form>
+      </ControlPanelButton>
+    </ControlPanelWrapper>
   )
 }
 
@@ -127,10 +158,10 @@ function JoinRoom({ joinRoom, roomCode, setRoomCode, newRoom, username, setUsern
       <Description>A TEAM-BASED CHESS GAME</Description>
       {isHomescreen ?
         <MainLobbyPortal roomCode={roomCode} setRoomCode={setRoomCode} setisCreatingRoom={setisCreatingRoom}
-         setisHomescreen={setisHomescreen} isRoomValid={isRoomValid} /> :
-        <UsernamePortal joinRoom={joinRoom} newRoom={newRoom} isCreatingRoom={isCreatingRoom} 
-        setisCreatingRoom={setisCreatingRoom} setisHomescreen={setisHomescreen}
-        username={username} setUsername={setUsername} />
+          setisHomescreen={setisHomescreen} isRoomValid={isRoomValid} /> :
+        <UsernamePortal joinRoom={joinRoom} newRoom={newRoom} isCreatingRoom={isCreatingRoom}
+          setisCreatingRoom={setisCreatingRoom} setisHomescreen={setisHomescreen}
+          username={username} setUsername={setUsername} />
       }
     </Wrapper>
   );

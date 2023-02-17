@@ -8,6 +8,8 @@ app.use(cors());
 const server = http.createServer(app);
 
 const rooms = new Map();
+// rooms.set(roomCode, { players: [[], []], moves: [], whiteTurn: true }); 
+// players[0] = white players
 
 const io = new Server(server, {
     cors: {
@@ -34,7 +36,7 @@ function newPlayer(roomCode, username) {
 function chooseWeakest(moves) {
     let index = 0;
     let champ = moves[0].rating;
-    for (let i = 1; i < moves.length; i++) {
+    for (let i = 0; i < moves.length; i++) {
         if (moves[i].rating < champ) {
             champ = moves[i].rating;
             index = i;
@@ -45,7 +47,7 @@ function chooseWeakest(moves) {
 function turnIsOver(thisRoom) {
     thisRoom.moves = [];
     thisRoom.whiteTurn = !thisRoom.whiteTurn;
-    console.log(thisRoom.whiteTurn);
+    console.log(`status of white's turn: ${thisRoom.whiteTurn}`);
 }
 function makeid(length) {
     var result = '';
@@ -69,6 +71,7 @@ io.on("connection", (socket) => {
     console.log('User Connected: ' + socket.id);
 
     socket.on("send_rating", (rating, position, roomCode, isWhite) => {
+        const thisRoom = rooms.get(roomCode);
         thisRoom.moves.push({ rating, position });
         console.log(thisRoom.moves);
         const teamLength = isWhite ? thisRoom.players[0].length : thisRoom.players[1].length;
@@ -76,7 +79,6 @@ io.on("connection", (socket) => {
             let weakest = chooseWeakest(thisRoom.moves);
             io.to(roomCode).emit("weakest_position", weakest);
             turnIsOver(thisRoom);
-            console.log(thisRoom.whiteTurn);
             io.to(roomCode).emit("nextTurn", thisRoom.whiteTurn);
         }
     });
@@ -85,6 +87,7 @@ io.on("connection", (socket) => {
         socket.join(roomCode);
         const isWhite = newPlayer(roomCode, username);
         socket.emit("room_joined", roomCode, isWhite);
+        io.to(roomCode).emit("update_players", JSON.stringify(rooms.get(roomCode).players))
     });
 
     socket.on("create_room", (username) => {
@@ -97,8 +100,7 @@ io.on("connection", (socket) => {
         socket.join(roomCode);
         newPlayer(roomCode, username)
         socket.emit("room_joined", roomCode, isWhite);
-        // io.to(roomCode).emit("update_players",rooms.get(roomCode).players)
-        console.log(rooms.get(roomCode).players);
+        io.to(roomCode).emit("update_players", JSON.stringify(rooms.get(roomCode).players))
     });
 
     socket.on("is_room_valid?", (roomCode) => {
@@ -116,7 +118,11 @@ io.on("connection", (socket) => {
         teams[newTeam].push(username);
         console.log(rooms.get(roomCode).players);
         console.log(`the teams are ${JSON.stringify(teams)}`)
-        io.to(roomCode).emit("update_players",JSON.stringify(teams));
+        io.to(roomCode).emit("update_players", JSON.stringify(teams));
+    });
+
+    socket.on("start_game", (roomCode) => {
+        io.to(roomCode).emit("begin_game");
     });
 
 });

@@ -1,8 +1,8 @@
 import io from 'socket.io-client';
 import { useState, useEffect } from "react";
 import { Chess } from "chess.js";
-import Game from "./components/game"
-import JoinRoom from "./components/JoinRoom"
+import Game from "./pages/game"
+import JoinRoom from "./pages/JoinRoom"
 import './App.css'
 import { Wrapper } from './StyledComponents';
 
@@ -14,13 +14,8 @@ function App() {
   const [roomCode, setRoomCode] = useState("");
   const [host, setHost] = useState(false);
   const [username, setUsername] = useState("");
-  const [isHomescreen, setisHomescreen] = useState(true);
   const [isWhite, setisWhite] = useState(true);
 
-  const isRoomValid = (event) => {
-    event.preventDefault();
-    socket.emit("is_room_valid?", roomCode);
-  }
 
   const joinRoom = (event) => {
     event.preventDefault();
@@ -43,25 +38,22 @@ function App() {
     socket.on("room_code", (roomCode) => {
       setRoomCode(roomCode);
     })
-    socket.on("no_room", () => {
-      alert("Game Not Found"); 
-    });
-    socket.on("yes_room", () => setisHomescreen(false));
+    
   }, []);
 
   return (
     <Wrapper>
       {!isInRoom &&
         <JoinRoom
+          socket={socket}
           joinRoom={joinRoom}
           roomCode={roomCode}
           setRoomCode={setRoomCode}
           newRoom={newRoom}
           username={username}
           setUsername={setUsername}
-          isHomescreen={isHomescreen}
-          setisHomescreen={setisHomescreen}
-          isRoomValid={isRoomValid}
+          host ={host}
+          setHost={setHost}
         />}
       {isInRoom && <Game
         socket={socket}

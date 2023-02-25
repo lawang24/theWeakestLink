@@ -1,15 +1,18 @@
-// setting up the server
-const express = require('express');
-const app = express();
-const http = require("http");
-const { Server } = require('socket.io');
-const cors = require("cors");
-app.use(cors());
-const server = http.createServer(app);
+//importing helper functions
+import { newPlayer, chooseWeakest, turnIsOver, makeid, deletePlayer } from "./helpers.js";
+import Timer from "./timer.js";
 
+// setting up the server
+import express from 'express';
+const app = express();
+import { createServer } from "http";
+import { Server } from 'socket.io';
+import cors from "cors";
+app.use(cors());
+const server = createServer(app);
+
+// setting up game stuff
 const rooms = new Map();
-// rooms.set(roomCode, { players: [[], []], moves: [], whiteTurn: true }); 
-// players[0] = white players
 
 const io = new Server(server, {
     cors: {
@@ -18,53 +21,6 @@ const io = new Server(server, {
     }
 });
 
-function newPlayer(roomCode, username) {
-    let isWhite;
-    const thisRoom = rooms.get(roomCode);
-    console.log(`${username} has joined room ${roomCode}`)
-    if (thisRoom.players[0].length <= thisRoom.players[1].length) {
-        thisRoom.players[0].push(username);
-        isWhite = true;
-    }
-    else {
-        thisRoom.players[1].push(username);
-        isWhite = false;
-    }
-    console.log(thisRoom);
-    return isWhite;
-}
-function chooseWeakest(moves) {
-    let index = 0;
-    let champ = moves[0].rating;
-    for (let i = 0; i < moves.length; i++) {
-        if (moves[i].rating < champ) {
-            champ = moves[i].rating;
-            index = i;
-        }
-        return moves[index].position;
-    }
-}
-function turnIsOver(thisRoom) {
-    thisRoom.moves = [];
-    thisRoom.whiteTurn = !thisRoom.whiteTurn;
-    console.log(`status of white's turn: ${thisRoom.whiteTurn}`);
-}
-function makeid(length) {
-    var result = '';
-    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    var charactersLength = characters.length;
-    for (var i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-}
-function deletePlayer(isWhite, roomCode, username) {
-    const oldTeam = isWhite ? 0 : 1;
-    const teams = rooms.get(roomCode).players;
-    for (let i = 0; i < teams[oldTeam].length; i++) {
-        if (username === teams[oldTeam][i]) teams[oldTeam].splice(i, 1);
-    };
-}
 
 
 io.on("connection", (socket) => {
@@ -80,12 +36,14 @@ io.on("connection", (socket) => {
             io.to(roomCode).emit("weakest_position", weakest);
             turnIsOver(thisRoom);
             io.to(roomCode).emit("nextTurn", thisRoom.whiteTurn);
+            rooms.get(roomCode).timer.nextTurn(thisRoom.whiteTurn);
         }
     });
 
     socket.on("join_room", (roomCode, username) => {
         socket.join(roomCode);
-        const isWhite = newPlayer(roomCode, username);
+        const thisRoom = rooms.get(roomCode);
+        const isWhite = newPlayer(thisRoom, username);
         socket.emit("room_joined", roomCode, isWhite);
         io.to(roomCode).emit("update_players", JSON.stringify(rooms.get(roomCode).players))
     });
@@ -96,9 +54,11 @@ io.on("connection", (socket) => {
         while (rooms.has(roomCode)) {
             roomCode = makeid(4);
         };
-        rooms.set(roomCode, { players: [[], []], moves: [], whiteTurn: true }); // players[0] = white players
+     
+        rooms.set(roomCode, { players: [[], []], moves: [], whiteTurn: true, timer : new Timer([300,300]) }); 
         socket.join(roomCode);
-        newPlayer(roomCode, username)
+        const thisRoom = rooms.get(roomCode);
+        newPlayer(thisRoom, username)
         socket.emit("room_joined", roomCode, isWhite);
         io.to(roomCode).emit("update_players", JSON.stringify(rooms.get(roomCode).players))
     });
@@ -110,10 +70,10 @@ io.on("connection", (socket) => {
     socket.on("change_team", (isWhite, roomCode, username) => {
 
         // delete player off the old team
-        deletePlayer(isWhite, roomCode, username);
+        const teams = rooms.get(roomCode).players;
+        deletePlayer(isWhite, teams, username);
 
         // in on the new team
-        const teams = rooms.get(roomCode).players;
         const newTeam = isWhite ? 1 : 0;
         teams[newTeam].push(username);
         console.log(rooms.get(roomCode).players);
@@ -123,6 +83,7 @@ io.on("connection", (socket) => {
 
     socket.on("start_game", (roomCode) => {
         io.to(roomCode).emit("begin_game");
+        rooms.get(roomCode).timer.startTimer(0);
     });
 
 });

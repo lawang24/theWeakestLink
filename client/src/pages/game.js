@@ -3,7 +3,7 @@ import { React, Component } from "react";
 import { Logo, SettingButton } from "../StyledComponents"
 import { GameWrapper, RoomCode as RoomCodeButton, ChangeTeam, TeamName, StartGame, Members, Tower, GameplaySection } from "../StyledComponents/gameComponents"
 import { TeamSection } from "../StyledComponents/gameComponents";
-import {Timer} from "../items/timer";
+import { Timer } from "../items/timer";
 
 
 const STOCKFISH = window.STOCKFISH;
@@ -27,14 +27,18 @@ const Teams = ({ players, isWhite }) => {
 }
 
 class Game extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
       fen: "start",
       turn: false,
       gameStarted: false,
-      players: {}
+      players: {},
+      canSubmitMove: false,
+      whiteTurn: false,
     }
+
   };
 
   componentDidMount() {
@@ -44,17 +48,16 @@ class Game extends Component {
       this.props.game.load(weakest);
     });
     this.props.socket.on("nextTurn", (isWhiteTurn) => {
-      if (this.props.isWhite) this.setState({ turn: isWhiteTurn });
-      else this.setState({ turn: !isWhiteTurn });
+      this.setState({ whiteTurn: !this.state.whiteTurn, turn: !this.state.turn });
+      if (this.props.isWhite === isWhiteTurn) this.setState({ canSubmitMove: true });
     });
     this.props.socket.on("update_players", (teams) => {
       let newTeams = JSON.parse(teams);
-      this.setState({ players: newTeams }); // it is this one
+      this.setState({ players: newTeams });
     });
     this.props.socket.on("begin_game", () => {
-      if (this.props.isWhite) this.setState({ turn: true });
-      this.setState({ gameStarted: true });
-
+      if (this.props.isWhite) this.setState({ turn: true, canSubmitMove: true });
+      this.setState({ whiteTurn: true, gameStarted: true });
     })
   };
 
@@ -68,12 +71,14 @@ class Game extends Component {
   }
 
   onDrop = ({ sourceSquare, targetSquare }) => {
-    if (!this.state.turn) return;
+    console.log(this.state.canSubmitMove);
+    if (!this.state.turn || !this.state.canSubmitMove) return;
     const move = this.props.game.move({ from: sourceSquare, to: targetSquare })
     if (move === null) return; // illegal move  
 
     // grab player proposed position and show it
     this.setState({ fen: this.props.game.fen() })
+    this.setState({ canSubmitMove: false });
 
     this.props.game.undo();
 
@@ -138,13 +143,13 @@ class Game extends Component {
 
 
   render() {
-    
-    let status = (this.state.turn ? "Your" : "Not Your"); 
 
 
-    const GameTimer = () =>{
+    let status = (this.state.turn ? "Your" : "Not Your");
+
+    const GameTimer = () => {
       if (this.props.gameStarted) return Timer(300);
-    }  
+    }
 
     const startGame = () => {
       if (this.props.host) return (<StartGame onClick={() => this.props.socket.emit("start_game", this.props.roomCode)}>START</StartGame>);
@@ -162,6 +167,8 @@ class Game extends Component {
     }
 
     let team = this.props.isWhite ? "white" : "black"
+
+    let blackTurn = this.state.gameStarted ? !this.state.whiteTurn : false;
 
     return (
       <GameWrapper>
@@ -193,8 +200,11 @@ class Game extends Component {
 
             <GameControls gameStarted={this.state.gameStarted} />
 
-            <h1 style={{color:"#FFFFFF"}}>{status} Turn</h1>
-            <Timer sec={300} turn={this.state.turn}/>
+            <h1 style={{ color: "#FFFFFF" }}>{status} Turn</h1>
+            <div style={{ display: "flex", height: "8%", width: "30%", justifyContent: "center", alignItems: "center" }}>
+              <Timer sec={300} turn={this.state.whiteTurn} />
+              <Timer sec={300} turn={blackTurn} />
+            </div>
           </GameplaySection>
 
           <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justify-content': 'start' }}>

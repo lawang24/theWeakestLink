@@ -1,13 +1,11 @@
 import io from 'socket.io-client';
 import { useState, useEffect } from "react";
-import { Chess } from "chess.js";
 import Game from "./pages/game"
 import JoinRoom from "./pages/JoinRoom"
 import './App.css'
 import { Wrapper } from './StyledComponents';
 
 const socket = io("http://localhost:3001");
-const game = new Chess();
 
 function App() {
   const [isInRoom, setInRoom] = useState(false);
@@ -15,7 +13,6 @@ function App() {
   const [host, setHost] = useState(false);
   const [username, setUsername] = useState("");
   const [isWhite, setisWhite] = useState(true);
-
 
   const joinRoom = (event) => {
     event.preventDefault();
@@ -57,7 +54,6 @@ function App() {
         />}
       {isInRoom && <Game
         socket={socket}
-        game={game}
         roomCode={roomCode}
         host={host}
         isWhite={isWhite}

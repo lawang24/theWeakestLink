@@ -15,8 +15,8 @@ function JoinRoom({ socket, joinRoom, roomCode, setRoomCode, newRoom, username, 
   useEffect(() => {
     socket.on("yes_room", () => setisHomescreen(false));
     socket.on("no_room", () => {
-      alert("Game Not Found") 
-      console.log("alert!")
+      alert("Game Not Found"); 
+      console.log("alert!");
     });
   }, [socket])
 

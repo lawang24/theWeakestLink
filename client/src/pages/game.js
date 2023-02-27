@@ -4,9 +4,10 @@ import { Logo, SettingButton } from "../StyledComponents"
 import { GameWrapper, RoomCode as RoomCodeButton, ChangeTeam, TeamName, StartGame, Members, Tower, GameplaySection } from "../StyledComponents/gameComponents"
 import { TeamSection } from "../StyledComponents/gameComponents";
 import { Timer } from "../items/timer";
-
+import { Chess } from "chess.js";
 
 const STOCKFISH = window.STOCKFISH;
+const game = new Chess();
 
 const Teams = ({ players, isWhite }) => {
   const team = isWhite ? 0 : 1;
@@ -37,19 +38,22 @@ class Game extends Component {
       players: {},
       canSubmitMove: false,
       whiteTurn: false,
+      isCheckmate: false,
+      timeOut: false,
     }
-
   };
 
   componentDidMount() {
-    this.props.socket.on("weakest_position", (weakest) => {
+    this.props.socket.on("nextTurn", (weakest, isWhiteTurn) => {
       console.log(weakest);
       this.setState({ fen: weakest });
-      this.props.game.load(weakest);
-    });
-    this.props.socket.on("nextTurn", (isWhiteTurn) => {
-      this.setState({ whiteTurn: !this.state.whiteTurn, turn: !this.state.turn });
-      if (this.props.isWhite === isWhiteTurn) this.setState({ canSubmitMove: true });
+      game.load(weakest);
+      // check if checkmate
+      if (game.isCheckmate() === true) this.setState({ gameStarted: false, isCheckmate: true })
+      else {
+        this.setState({ whiteTurn: !this.state.whiteTurn, turn: !this.state.turn });
+        if (this.props.isWhite === isWhiteTurn) this.setState({ canSubmitMove: true });
+      };
     });
     this.props.socket.on("update_players", (teams) => {
       let newTeams = JSON.parse(teams);
@@ -58,6 +62,9 @@ class Game extends Component {
     this.props.socket.on("begin_game", () => {
       if (this.props.isWhite) this.setState({ turn: true, canSubmitMove: true });
       this.setState({ whiteTurn: true, gameStarted: true });
+    })
+    this.props.socket.on("time_out", () => {
+      this.setState({ gameStarted: false, timeOut: true });
     })
   };
 
@@ -73,14 +80,14 @@ class Game extends Component {
   onDrop = ({ sourceSquare, targetSquare }) => {
     console.log(this.state.canSubmitMove);
     if (!this.state.turn || !this.state.canSubmitMove) return;
-    const move = this.props.game.move({ from: sourceSquare, to: targetSquare })
+    const move = game.move({ from: sourceSquare, to: targetSquare })
     if (move === null) return; // illegal move  
 
     // grab player proposed position and show it
-    this.setState({ fen: this.props.game.fen() })
+    this.setState({ fen: game.fen() })
     this.setState({ canSubmitMove: false });
 
-    this.props.game.undo();
+    game.undo();
 
     return new Promise((resolve) => {
       resolve();
@@ -101,13 +108,13 @@ class Game extends Component {
       if (announced_game_over) {
         return;
       }
-      if (this.props.game.isGameOver()) {
+      if (game.isGameOver()) {
         announced_game_over = true;
       }
     }, 500);
 
     const evalMove = () => {
-      if (!this.props.game.isGameOver()) {
+      if (!game.isGameOver()) {
         engine.postMessage("ucinewgame");
         engine.postMessage("position fen " + this.state.fen);
         engine.postMessage("eval");
@@ -147,10 +154,6 @@ class Game extends Component {
 
     let status = (this.state.turn ? "Your" : "Not Your");
 
-    const GameTimer = () => {
-      if (this.props.gameStarted) return Timer(300);
-    }
-
     const startGame = () => {
       if (this.props.host) return (<StartGame onClick={() => this.props.socket.emit("start_game", this.props.roomCode)}>START</StartGame>);
     };
@@ -166,7 +169,22 @@ class Game extends Component {
       }
     }
 
+    
+
     let team = this.props.isWhite ? "white" : "black"
+
+    const Gameover = () => {
+      if (this.state.isCheckmate) {
+        return (
+          <div>CHECKMATE BUCKO</div>
+        )
+      }
+      else if (this.state.timeOut){
+        return (
+          <div>{team.toUpperCase()} WINS ON TIME</div>
+        )
+      }
+    }
 
     let blackTurn = this.state.gameStarted ? !this.state.whiteTurn : false;
 
@@ -201,9 +219,10 @@ class Game extends Component {
             <GameControls gameStarted={this.state.gameStarted} />
 
             <h1 style={{ color: "#FFFFFF" }}>{status} Turn</h1>
+            <h1 style={{ color: "#FFFFFF" }}>{Gameover()}</h1>
             <div style={{ display: "flex", height: "8%", width: "30%", justifyContent: "center", alignItems: "center" }}>
-              <Timer sec={300} turn={this.state.whiteTurn} />
-              <Timer sec={300} turn={blackTurn} />
+              <Timer sec={10} turn={this.state.whiteTurn} />
+              <Timer sec={10} turn={blackTurn} />
             </div>
           </GameplaySection>
 

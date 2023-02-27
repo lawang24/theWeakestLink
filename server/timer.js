@@ -14,12 +14,13 @@
         return this.#timeLeft;
     };
 
-    startTimer() {
+    startTimer(callback) {
         this.#timer = setInterval(() => {
             // white goes first
             this.#timeLeft[0]--;
             if (this.#timeLeft[0]<=0) {
                 clearInterval(this.#timer);
+                callback();
             }
         }, 1000);
     };
@@ -28,14 +29,16 @@
         clearInterval(this.#timer);
     };
 
-    nextTurn(isWhite) {
+    nextTurn(isWhite,callback,io,roomCode) {
         const team = isWhite? 0 : 1;
         clearInterval(this.#timer);
         this.#timer = setInterval(() => {
             this.#timeLeft[team]--;
             if (this.#timeLeft[team]<=0) {
                 clearInterval(this.#timer);
+                callback(io,roomCode);
             }
+        console.log(`timer: ${this.getTimer()}`)
         }, 1000);
 
     };

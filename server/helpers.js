@@ -16,13 +16,16 @@ export function newPlayer(thisRoom, username) {
 export function chooseWeakest(moves) {
     let index = 0;
     let champ = moves[0].rating;
+
     for (let i = 0; i < moves.length; i++) {
         if (moves[i].rating < champ) {
             champ = moves[i].rating;
             index = i;
         }
-        return moves[index].position;
+        
     }
+    return moves[index].position;
+
 }
 export function turnIsOver(thisRoom) {
     thisRoom.moves = [];

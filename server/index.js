@@ -21,7 +21,9 @@ const io = new Server(server, {
     }
 });
 
-
+const time_out = (io,roomCode) =>{
+    io.to(roomCode).emit("time_out");
+}
 
 io.on("connection", (socket) => {
     console.log('User Connected: ' + socket.id);
@@ -33,10 +35,11 @@ io.on("connection", (socket) => {
         const teamLength = isWhite ? thisRoom.players[0].length : thisRoom.players[1].length;
         if (teamLength && teamLength === thisRoom.moves.length) {
             let weakest = chooseWeakest(thisRoom.moves);
-            io.to(roomCode).emit("weakest_position", weakest);
+            console.log(`weakest: ${weakest}`);
             turnIsOver(thisRoom);
-            io.to(roomCode).emit("nextTurn", thisRoom.whiteTurn);
-            rooms.get(roomCode).timer.nextTurn(thisRoom.whiteTurn);
+            io.to(roomCode).emit("nextTurn", weakest,thisRoom.whiteTurn);
+            // timer handling
+            rooms.get(roomCode).timer.nextTurn(thisRoom.whiteTurn,time_out,io,roomCode);
         }
     });
 
@@ -55,10 +58,10 @@ io.on("connection", (socket) => {
             roomCode = makeid(4);
         };
      
-        rooms.set(roomCode, { players: [[], []], moves: [], whiteTurn: true, timer : new Timer([300,300]) }); 
+        rooms.set(roomCode, { players: [[], []], moves: [], whiteTurn: true, timer : new Timer([10,10]) }); 
         socket.join(roomCode);
         const thisRoom = rooms.get(roomCode);
-        newPlayer(thisRoom, username)
+        newPlayer(thisRoom, username);
         socket.emit("room_joined", roomCode, isWhite);
         io.to(roomCode).emit("update_players", JSON.stringify(rooms.get(roomCode).players))
     });
@@ -83,7 +86,6 @@ io.on("connection", (socket) => {
 
     socket.on("start_game", (roomCode) => {
         io.to(roomCode).emit("begin_game");
-        rooms.get(roomCode).timer.startTimer(0);
     });
 
 });

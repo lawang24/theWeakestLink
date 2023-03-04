@@ -69,20 +69,7 @@ export const Tower = (props) => {
     else return <img style={props.style} src={blackTower} alt="logo" />
 }
 
-export const Members = styled.ul`
-display: flex;
-flex-flow: column;
-height: fit-content;
-width: fit-content%;
-list-style-type:none;
-padding:0;
-margin:0;
-font-family: 'Montserrat';
-font-style: normal;
-font-weight: 600;
-font-size: 18px;
-min-height:15vh;
-`;
+
 
 
 // you hve the style the list items, not the actual custom component

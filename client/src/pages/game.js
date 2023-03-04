@@ -1,31 +1,14 @@
 import Chessboard from "chessboardjsx";
 import { React, Component } from "react";
 import { Logo, SettingButton } from "../StyledComponents"
-import { GameWrapper, RoomCode as RoomCodeButton, ChangeTeam, TeamName, StartGame, Members, Tower, GameplaySection } from "../StyledComponents/gameComponents"
+import { GameWrapper, RoomCode as RoomCodeButton, ChangeTeam, TeamName, StartGame, GameplaySection } from "../StyledComponents/gameComponents"
 import { TeamSection } from "../StyledComponents/gameComponents";
-import { Timer } from "../items/timer";
+import { CountdownTimer } from "../items/frontTimer";
 import { Chess } from "chess.js";
+import { Teams, Ratings } from "../items/displayItems";
 
 const STOCKFISH = window.STOCKFISH;
 const game = new Chess();
-
-const Teams = ({ players, isWhite }) => {
-  const team = isWhite ? 0 : 1;
-
-  if (Object.keys(players).length === 0) return;
-  else return (
-    <Members>
-      {players[team].map((player, i) => {
-        return (
-          <div style={{ display: "flex", width: "100%", justifyContent: "start", height: "fit-content", marginBottom: "10px" }}>
-            <Tower isWhite={isWhite} style={{ height: "22px", paddingRight: "8px" }} />
-            <li style={{ color: "#FFFFFF", height: "fit-content" }} key={i}> {player} </li>
-          </div>
-        )
-      })}
-    </Members>
-  )
-}
 
 class Game extends Component {
 
@@ -40,14 +23,23 @@ class Game extends Component {
       whiteTurn: false,
       isCheckmate: false,
       timeOut: false,
+      ratings: [],
+      white_time: 600,
+      black_time: 600,
     }
+
+    this.increment_whitetime = this.increment_whitetime.bind(this);
+    this.increment_blacktime = this.increment_blacktime.bind(this);
   };
 
   componentDidMount() {
-    this.props.socket.on("nextTurn", (weakest, isWhiteTurn) => {
+    this.props.socket.on("nextTurn", (weakest, isWhiteTurn, ratings) => {
       console.log(weakest);
       this.setState({ fen: weakest });
       game.load(weakest);
+
+      if (this.props.isWhite !== isWhiteTurn) this.setState({ ratings: ratings });
+
       // check if checkmate
       if (game.isCheckmate() === true) this.setState({ gameStarted: false, isCheckmate: true })
       else {
@@ -69,7 +61,7 @@ class Game extends Component {
   };
 
   sendRating = (rating, position) => {
-    this.props.socket.emit("send_rating", rating, position, this.props.roomCode, this.props.isWhite);
+    this.props.socket.emit("send_rating", rating, position, this.props.roomCode, this.props.isWhite, this.props.username);
   };
 
   changeTeam = () => {
@@ -148,6 +140,18 @@ class Game extends Component {
     };
   };
 
+  increment_whitetime = () => {
+    this.setState((state) => ({
+      white_time: state.white_time - 1
+    }));
+  };
+
+  increment_blacktime = () => {
+    this.setState((state) => ({
+      black_time: state.black_time - 1
+    }));
+  };
+
 
   render() {
 
@@ -169,7 +173,7 @@ class Game extends Component {
       }
     }
 
-    
+
 
     let team = this.props.isWhite ? "white" : "black"
 
@@ -179,7 +183,7 @@ class Game extends Component {
           <div>CHECKMATE BUCKO</div>
         )
       }
-      else if (this.state.timeOut){
+      else if (this.state.timeOut) {
         return (
           <div>{team.toUpperCase()} WINS ON TIME</div>
         )
@@ -216,13 +220,17 @@ class Game extends Component {
               </TeamSection>
             </div>
 
+            <Ratings ratings={this.state.ratings} />
+
             <GameControls gameStarted={this.state.gameStarted} />
 
             <h1 style={{ color: "#FFFFFF" }}>{status} Turn</h1>
             <h1 style={{ color: "#FFFFFF" }}>{Gameover()}</h1>
             <div style={{ display: "flex", height: "8%", width: "30%", justifyContent: "center", alignItems: "center" }}>
-              <Timer sec={10} turn={this.state.whiteTurn} />
-              <Timer sec={10} turn={blackTurn} />
+
+              <CountdownTimer totalSeconds={this.state.white_time} increment={this.increment_whitetime} isRunning={this.state.whiteTurn} />
+              <CountdownTimer totalSeconds={this.state.black_time} increment={this.increment_blacktime} isRunning={(!this.state.whiteTurn && this.state.gameStarted)} />
+
             </div>
           </GameplaySection>
 

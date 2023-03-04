@@ -21,25 +21,37 @@ const io = new Server(server, {
     }
 });
 
-const time_out = (io,roomCode) =>{
+const time_out = (io, roomCode) => {
     io.to(roomCode).emit("time_out");
 }
 
 io.on("connection", (socket) => {
     console.log('User Connected: ' + socket.id);
 
-    socket.on("send_rating", (rating, position, roomCode, isWhite) => {
+    socket.on("send_rating", (rating, position, roomCode, isWhite, username) => {
+        const team = isWhite ? 0 : 1;
         const thisRoom = rooms.get(roomCode);
+
+        // enters the player's move into move array (for calculation of weakest)
         thisRoom.moves.push({ rating, position });
-        console.log(thisRoom.moves);
-        const teamLength = isWhite ? thisRoom.players[0].length : thisRoom.players[1].length;
+        console.log("moves: "+ JSON.stringify(thisRoom.moves));
+
+        // enters the rating into rating array for display of ratings
+        const index = thisRoom.players[team].indexOf(username); 
+        thisRoom.ratings[index] = rating; 
+        console.log("ratings: "+ JSON.stringify(thisRoom.ratings));
+
+
+        const teamLength =  thisRoom.players[team].length;
+
         if (teamLength && teamLength === thisRoom.moves.length) {
             let weakest = chooseWeakest(thisRoom.moves);
             console.log(`weakest: ${weakest}`);
             turnIsOver(thisRoom);
-            io.to(roomCode).emit("nextTurn", weakest,thisRoom.whiteTurn);
-            // timer handling
-            rooms.get(roomCode).timer.nextTurn(thisRoom.whiteTurn,time_out,io,roomCode);
+            io.to(roomCode).emit("nextTurn", weakest, thisRoom.whiteTurn, thisRoom.ratings);
+            
+            // starts the timer 
+            thisRoom.timer.nextTurn(thisRoom.whiteTurn, time_out, io, roomCode);
         }
     });
 
@@ -57,8 +69,8 @@ io.on("connection", (socket) => {
         while (rooms.has(roomCode)) {
             roomCode = makeid(4);
         };
-     
-        rooms.set(roomCode, { players: [[], []], moves: [], whiteTurn: true, timer : new Timer([10,10]) }); 
+
+        rooms.set(roomCode, { players: [[], []], moves: [], whiteTurn: true, timer: new Timer([10, 10]), ratings:[] });
         socket.join(roomCode);
         const thisRoom = rooms.get(roomCode);
         newPlayer(thisRoom, username);

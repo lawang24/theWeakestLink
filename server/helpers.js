@@ -1,7 +1,6 @@
 export function newPlayer(thisRoom, username) {
     let isWhite;
     
-    console.log(`${username} has joined room ${thisRoom}`)
     if (thisRoom.players[0].length <= thisRoom.players[1].length) {
         thisRoom.players[0].push(username);
         isWhite = true;

@@ -1,6 +1,6 @@
 export function newPlayer(thisRoom, username) {
     let isWhite;
-    
+
     if (thisRoom.players[0].length <= thisRoom.players[1].length) {
         thisRoom.players[0].push(username);
         isWhite = true;
@@ -21,15 +21,22 @@ export function chooseWeakest(moves) {
             champ = moves[i].rating;
             index = i;
         }
-        
+
     }
-    return moves[index].position;
+
+    const position_and_index = [moves[index].position, index]
+
+    return position_and_index;
 
 }
-export function turnIsOver(thisRoom) {
+export function turnIsOver(thisRoom,team,index) {
     thisRoom.moves = [];
     thisRoom.whiteTurn = !thisRoom.whiteTurn;
     console.log(`status of white's turn: ${thisRoom.whiteTurn}`);
+
+    // update scorecard
+    thisRoom.scorecard[team][index]++;
+    console.log(thisRoom.scorecard);
 }
 export function makeid(length) {
     var result = '';
@@ -46,4 +53,17 @@ export function deletePlayer(isWhite, teams, username) {
         if (username === teams[oldTeam][i]) teams[oldTeam].splice(i, 1);
     };
 }
+export function createCounters(thisRoom) {
+    let isWhite;
 
+    if (thisRoom.players[0].length <= thisRoom.players[1].length) {
+        thisRoom.players[0].push(username);
+        isWhite = true;
+    }
+    else {
+        thisRoom.players[1].push(username);
+        isWhite = false;
+    }
+    console.log(thisRoom);
+    return isWhite;
+}

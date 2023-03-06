@@ -3,9 +3,8 @@ import { React, Component } from "react";
 import { Logo, SettingButton } from "../StyledComponents"
 import { GameWrapper, RoomCode as RoomCodeButton, ChangeTeam, TeamName, StartGame, GameplaySection } from "../StyledComponents/gameComponents"
 import { TeamSection } from "../StyledComponents/gameComponents";
-import { CountdownTimer } from "../items/frontTimer";
 import { Chess } from "chess.js";
-import { Teams, Ratings } from "../items/displayItems";
+import { Teams, Ratings, CountdownTimer } from "../items/displayItems";
 
 const STOCKFISH = window.STOCKFISH;
 const game = new Chess();
@@ -19,6 +18,7 @@ class Game extends Component {
       turn: false,
       gameStarted: false,
       players: {},
+      scorecard: {},
       canSubmitMove: false,
       whiteTurn: false,
       isCheckmate: false,
@@ -27,18 +27,19 @@ class Game extends Component {
       white_time: 600,
       black_time: 600,
     }
-
     this.increment_whitetime = this.increment_whitetime.bind(this);
     this.increment_blacktime = this.increment_blacktime.bind(this);
   };
 
   componentDidMount() {
-    this.props.socket.on("nextTurn", (weakest, isWhiteTurn, ratings) => {
+    this.props.socket.on("nextTurn", (weakest, isWhiteTurn, ratings, scorecard) => {
       console.log(weakest);
-      this.setState({ fen: weakest });
+      console.log(scorecard);
+      this.setState({ fen: weakest, scorecard: scorecard });
       game.load(weakest);
 
-      if (this.props.isWhite !== isWhiteTurn) this.setState({ ratings: ratings });
+      // if no longer your turn, update last turn's ratings so you can see who's the bum
+      if (this.props.isWhite !== isWhiteTurn) this.setState({ ratings: ratings }); 
 
       // check if checkmate
       if (game.isCheckmate() === true) this.setState({ gameStarted: false, isCheckmate: true })
@@ -48,12 +49,13 @@ class Game extends Component {
       };
     });
     this.props.socket.on("update_players", (teams) => {
-      let newTeams = JSON.parse(teams);
-      this.setState({ players: newTeams });
+      this.setState({ players: JSON.parse(teams) });
     });
-    this.props.socket.on("begin_game", () => {
+    this.props.socket.on("begin_game", (scorecard) => {
+      const Scorecard = JSON.parse(scorecard);
+      this.setState({ whiteTurn: true, gameStarted: true, scorecard: Scorecard });
       if (this.props.isWhite) this.setState({ turn: true, canSubmitMove: true });
-      this.setState({ whiteTurn: true, gameStarted: true });
+      
     })
     this.props.socket.on("time_out", () => {
       this.setState({ gameStarted: false, timeOut: true });
@@ -155,9 +157,6 @@ class Game extends Component {
 
   render() {
 
-
-    let status = (this.state.turn ? "Your" : "Not Your");
-
     const startGame = () => {
       if (this.props.host) return (<StartGame onClick={() => this.props.socket.emit("start_game", this.props.roomCode)}>START</StartGame>);
     };
@@ -173,10 +172,6 @@ class Game extends Component {
       }
     }
 
-
-
-    let team = this.props.isWhite ? "white" : "black"
-
     const Gameover = () => {
       if (this.state.isCheckmate) {
         return (
@@ -190,7 +185,9 @@ class Game extends Component {
       }
     }
 
-    let blackTurn = this.state.gameStarted ? !this.state.whiteTurn : false;
+    let team = this.props.isWhite ? "white" : "black"
+    let status = (this.state.turn ? "Your" : "Not Your");
+
 
     return (
       <GameWrapper>
@@ -212,11 +209,11 @@ class Game extends Component {
             <div style={{ display: "flex", "flex-flow": "row wrap", "justify-content": "center", height: "fit-content", width: "100%", "margin-top": "17%" }}>
               <TeamSection>
                 <TeamName color="white">WHITE</TeamName>
-                <Teams players={this.state.players} isWhite={true} />
+                <Teams players={this.state.players} isWhite={true} scorecard={this.state.scorecard} gameStarted={this.state.gameStarted} />
               </TeamSection>
               <TeamSection>
                 <TeamName>BLACK</TeamName>
-                <Teams players={this.state.players} isWhite={false} />
+                <Teams players={this.state.players} isWhite={false} scorecard={this.state.scorecard} gameStarted={this.state.gameStarted} />
               </TeamSection>
             </div>
 
@@ -229,7 +226,8 @@ class Game extends Component {
             <div style={{ display: "flex", height: "8%", width: "30%", justifyContent: "center", alignItems: "center" }}>
 
               <CountdownTimer totalSeconds={this.state.white_time} increment={this.increment_whitetime} isRunning={this.state.whiteTurn} />
-              <CountdownTimer totalSeconds={this.state.black_time} increment={this.increment_blacktime} isRunning={(!this.state.whiteTurn && this.state.gameStarted)} />
+              <CountdownTimer totalSeconds={this.state.black_time} increment={this.increment_blacktime}
+                isRunning={(!this.state.whiteTurn && this.state.gameStarted)} />
 
             </div>
           </GameplaySection>

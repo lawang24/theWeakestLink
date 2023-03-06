@@ -38,9 +38,7 @@
                 clearInterval(this.#timer);
                 callback(io,roomCode);
             }
-        console.log(`timer: ${this.getTimer()}`)
         }, 1000);
-
     };
 
 }

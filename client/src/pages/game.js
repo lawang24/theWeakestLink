@@ -18,7 +18,7 @@ class Game extends Component {
       turn: false,
       gameStarted: false,
       players: {},
-      scorecard: {},
+      scorecard: {}, 
       canSubmitMove: false,
       whiteTurn: false,
       isCheckmate: false,
@@ -48,18 +48,33 @@ class Game extends Component {
         if (this.props.isWhite === isWhiteTurn) this.setState({ canSubmitMove: true });
       };
     });
+
     this.props.socket.on("update_players", (teams) => {
       this.setState({ players: JSON.parse(teams) });
     });
+
     this.props.socket.on("begin_game", (scorecard) => {
       const Scorecard = JSON.parse(scorecard);
-      this.setState({ whiteTurn: true, gameStarted: true, scorecard: Scorecard });
+      this.setState({ 
+      whiteTurn: true, 
+      gameStarted: true, 
+      scorecard: Scorecard, 
+      fen: "start", 
+      isCheckmate: false,
+      timeOut: false,
+      white_time: 600,
+      black_time: 600,
+    });
       if (this.props.isWhite) this.setState({ turn: true, canSubmitMove: true });
+
+      game.reset(); // restart the game
       
     })
+
     this.props.socket.on("time_out", () => {
       this.setState({ gameStarted: false, timeOut: true });
     })
+
   };
 
   sendRating = (rating, position) => {

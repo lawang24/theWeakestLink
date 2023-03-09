@@ -1,4 +1,4 @@
- class Timer {
+class Timer {
     #timeLeft;
     #timer;
 
@@ -14,30 +14,32 @@
         return this.#timeLeft;
     };
 
-    startTimer(callback) {
+    startTimer(callback, io, roomCode) {
         this.#timer = setInterval(() => {
             // white goes first
             this.#timeLeft[0]--;
-            if (this.#timeLeft[0]<=0) {
+            if (this.#timeLeft[0] <= 0) {
                 clearInterval(this.#timer);
-                callback();
+                callback(io, roomCode);
             }
+        console.log(this.getTimer());
         }, 1000);
     };
 
-    stopTimer(){
+    stopTimer() {
         clearInterval(this.#timer);
     };
 
-    nextTurn(isWhite,callback,io,roomCode) {
-        const team = isWhite? 0 : 1;
+    nextTurn(isWhite, callback, io, roomCode) {
+        const team = isWhite ? 0 : 1;
         clearInterval(this.#timer);
         this.#timer = setInterval(() => {
             this.#timeLeft[team]--;
-            if (this.#timeLeft[team]<=0) {
+            if (this.#timeLeft[team] <= 0) {
                 clearInterval(this.#timer);
-                callback(io,roomCode);
+                callback(io, roomCode);
             }
+            console.log(this.getTimer());
         }, 1000);
     };
 

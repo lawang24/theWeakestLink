@@ -2,14 +2,26 @@
 import { newPlayer, chooseWeakest, turnIsOver, makeid, deletePlayer } from "./helpers.js";
 import Timer from "./timer.js";
 
+const port = 3001;
+
 // setting up the server
 import express from 'express';
 const app = express();
-import { createServer } from "http";
 import { Server } from 'socket.io';
+
 import cors from "cors";
 app.use(cors());
-const server = createServer(app);
+
+app.get('/', (req, res) => {
+    res.send('hello motherfucker')
+})
+
+
+import http from "http";
+const server = http.createServer(app);
+
+
+
 
 // setting up game stuff
 const rooms = new Map();
@@ -74,7 +86,7 @@ io.on("connection", (socket) => {
             roomCode = makeid(4);
         };
 
-        rooms.set(roomCode, { players: [[], []], scorecard:[], moves: [], whiteTurn: true, timer: new Timer([600, 600]), ratings: [] });
+        rooms.set(roomCode, { players: [[], []], scorecard: [], moves: [], whiteTurn: true, timer: new Timer([600, 600]), ratings: [] });
         socket.join(roomCode);
         const thisRoom = rooms.get(roomCode);
         newPlayer(thisRoom, username);
@@ -104,33 +116,33 @@ io.on("connection", (socket) => {
         const thisRoom = rooms.get(roomCode);
 
         // create the scorecards
-        thisRoom.scorecard = []; 
+        thisRoom.scorecard = [];
         thisRoom.ratings = [];
         thisRoom.scorecard.push(new Array(thisRoom.players[0].length).fill(0));
         thisRoom.scorecard.push(new Array(thisRoom.players[1].length).fill(0));
-        thisRoom.timer.setTimer([600,600]);
+        thisRoom.timer.setTimer([600, 600]);
         thisRoom.timer.startTimer(time_out, io, roomCode);
         console.log(thisRoom);
         io.to(roomCode).emit("begin_game", JSON.stringify(thisRoom.scorecard));
 
     });
 
-    socket.on("disconnecting", ()=>{
+    socket.on("disconnecting", () => {
         const roomCode = Array.from(socket.rooms).pop();
         const playerCount = (io.sockets.adapter.rooms.get(roomCode).size); // number of players in room
-        
+
         // free memory if everybody gone
-        if (playerCount == 1) { 
+        if (playerCount == 1) {
             rooms.get(roomCode).timer.stopTimer(); // stop all timers etc
             rooms.delete(roomCode);
-        }; 
+        };
     });
 
 
 });
 
-server.listen(3001, () => {
-    console.log("server is running")
+server.listen(process.env.PORT || port, () => {
+    console.log(`server is on port ${port}`)
 });
 
 

@@ -18,6 +18,10 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+console.log(path.join(__dirname,'..','client','build'));
+console.log(path.join(__dirname,'..','client','build','index.html'));
+
+
 const io = new Server(server, {
 
 });

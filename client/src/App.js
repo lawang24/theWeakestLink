@@ -5,7 +5,9 @@ import JoinRoom from "./pages/JoinRoom"
 import './App.css'
 import { Wrapper } from './StyledComponents';
 
-const socket = io("http://localhost:3001");
+const socket = io();
+
+console.log(window.location);
 
 function App() {
   const [isInRoom, setInRoom] = useState(false);

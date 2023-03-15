@@ -7,30 +7,30 @@ const port = 3001;
 // setting up the server
 import express from 'express';
 const app = express();
-import { Server } from 'socket.io';
-
-import cors from "cors";
-app.use(cors());
-
-app.get('/', (req, res) => {
-    res.send('hello motherfucker')
-})
-
-
 import http from "http";
 const server = http.createServer(app);
+import { Server } from 'socket.io';
 
 
+
+// import cors from "cors";
+// app.use(cors());
+
+import path from 'path';
+app.use(express.static(path.join(__dirname,'..','client','build')));
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname,'..','client','build','index.html'));
+})
 
 
 // setting up game stuff
 const rooms = new Map();
 
 const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:3000",
-        methods: ["GET", "POST"],
-    }
+    // cors: {
+    //     origin: "http://localhost:3000",
+    //     methods: ["GET", "POST"],
+    // }
 });
 
 const time_out = (io, roomCode) => {

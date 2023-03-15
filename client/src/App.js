@@ -5,7 +5,7 @@ import JoinRoom from "./pages/JoinRoom"
 import './App.css'
 import { Wrapper } from './StyledComponents';
 
-const socket = io("https://chess-server-yuwn.onrender.com");
+const socket = io("http://localhost:3001");
 
 function App() {
   const [isInRoom, setInRoom] = useState(false);

@@ -1,21 +1,21 @@
 import styled from 'styled-components';
-import { Logo, Wrapper} from "../StyledComponents";
+import { Logo, Wrapper } from "../StyledComponents";
 import { useState, useEffect } from 'react';
-import {MainLobbyPortal} from "../items/mainLobbyPortal";
-import {UsernamePortal} from "../items/usernamePortal";
+import { MainLobbyPortal } from "../items/mainLobbyPortal";
+import { UsernamePortal } from "../items/usernamePortal";
 
 function JoinRoom({ socket, joinRoom, roomCode, setRoomCode, newRoom, username, setUsername, host, setHost }) {
   const [isHomescreen, setisHomescreen] = useState(true);
-  
+
   const isRoomValid = (event) => {
     event.preventDefault();
     socket.emit("is_room_valid?", roomCode);
   }
-  
+
   useEffect(() => {
     socket.on("yes_room", () => setisHomescreen(false));
     socket.on("no_room", () => {
-      alert("Game Not Found"); 
+      alert("Game Not Found");
       console.log("alert!");
     });
   }, [socket])

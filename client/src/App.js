@@ -5,9 +5,27 @@ import JoinRoom from "./pages/JoinRoom"
 import './App.css'
 import { Wrapper } from './StyledComponents';
 
-const socket = io();
+const socket = io('http://localhost:3001');
 
-console.log(window.location);
+function useSocketHandlers(socket, setInRoom, setRoomCode, setIsWhite) {
+  useEffect(() => {
+    socket.on("room_joined", (roomCode, isWhite) => {
+      setRoomCode(roomCode);
+      setInRoom(true);
+      setIsWhite(isWhite);
+    });
+
+    socket.on("room_code", (roomCode) => {
+      setRoomCode(roomCode);
+    });
+
+    // Clean up event listeners on unmount
+    return () => {
+      socket.off("room_joined");
+      socket.off("room_code");
+    };
+  }, [socket, setInRoom, setRoomCode, setIsWhite]);
+}
 
 function App() {
   const [isInRoom, setInRoom] = useState(false);
@@ -28,21 +46,21 @@ function App() {
     setInRoom(true);
   };
 
-  useEffect(() => {
-    socket.on("room_joined", (roomCode,isWhite) => {
-      setRoomCode(roomCode);
-      setInRoom(true);
-      setisWhite(isWhite);
-    })
-    socket.on("room_code", (roomCode) => {
-      setRoomCode(roomCode);
-    })
-    
-  }, []);
+  // Use the custom hook for handling socket events
+  useSocketHandlers(socket, setInRoom, setRoomCode, setisWhite);
 
   return (
     <Wrapper>
-      {!isInRoom &&
+      {isInRoom ? (
+        <Game
+          socket={socket}
+          roomCode={roomCode}
+          host={host}
+          isWhite={isWhite}
+          setisWhite={setisWhite}
+          username={username}
+        />
+      ) : (
         <JoinRoom
           socket={socket}
           joinRoom={joinRoom}
@@ -51,17 +69,11 @@ function App() {
           newRoom={newRoom}
           username={username}
           setUsername={setUsername}
-          host ={host}
+          host={host}
           setHost={setHost}
-        />}
-      {isInRoom && <Game
-        socket={socket}
-        roomCode={roomCode}
-        host={host}
-        isWhite={isWhite}
-        setisWhite={setisWhite}
-        username={username}
-      />}
+        />
+      )}
+
     </Wrapper>
   );
 }

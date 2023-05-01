@@ -1,24 +1,26 @@
 import styled from "styled-components";
 import { Tower } from "../StyledComponents/gameComponents"
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 
 export const Teams = ({ players, isWhite, scorecard, gameStarted }) => {
   const team = isWhite ? 0 : 1;
 
-  const Icon = ({index}) => {
+  const Icon = ({ index }) => {
     if (!gameStarted) return <Tower isWhite={isWhite} style={{ height: "22px", paddingRight: "8px" }} />
-    else return <ScoreNumber>{scorecard[team][index]}</ScoreNumber>
+    return <ScoreNumber>{scorecard[team][index]}</ScoreNumber>
   }
 
-  if (Object.keys(players).length === 0) return;
-  else return (
+  if (Object.keys(players).length === 0)
+    return;
+
+  return (
     <Members>
       {players[team].map((player, index) => {
         return (
           <div style={{ display: "flex", width: "100%", justifyContent: "start", height: "fit-content", marginBottom: "10px" }}>
-            <Icon index= {index} />
+            <Icon index={index} />
             <li style={{ color: "#FFFFFF", height: "fit-content" }} key={player}> {player} </li>
-          </div> 
+          </div>
         )
       })}
     </Members>
@@ -51,7 +53,7 @@ export const Ratings = ({ ratings }) => {
     <RatingList>
       {ratings.map((x, i) => {
         return (
-            <RatingNumber> {x} </RatingNumber>
+          <RatingNumber> {x} </RatingNumber>
         )
       })}
     </RatingList>
@@ -70,29 +72,33 @@ height: fit-content;
 margin: 0 7px;
 `
 
-export function CountdownTimer({ totalSeconds, increment, isRunning }) {
+export function CountdownTimer({ totalSeconds, isRunning }) {
+
+  const [remainingTime, setRemainingTime] = useState(totalSeconds);
 
   useEffect(() => {
+    let interval = null;
 
-      let interval = null;
+    if (isRunning && totalSeconds > 0) {
+      let end_time = new Date().getTime() + totalSeconds * 1000;
 
-      if (isRunning && totalSeconds > 0) {
-          interval = setInterval(() => {
-              increment();
-          }, 1000);
-      }
+      interval = setInterval(() => {
+        const timeLeft = Math.floor((end_time - new Date().getTime()) / 1000);
+        setRemainingTime(timeLeft > 0 ? timeLeft : 0);
+      }, 1000);
+    }
 
-      return () => clearInterval(interval);
+    return () => clearInterval(interval);
 
-  }, [isRunning, totalSeconds, increment]);
+  }, [isRunning, totalSeconds]);
 
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
+  const minutes = Math.floor(remainingTime / 60);
+  const seconds = remainingTime % 60;
 
   return (
-      <Digits>
-          <span>{minutes}</span>:<span>{seconds}</span>
-      </Digits>
+    <Digits>
+      <span>{minutes}</span>:<span>{seconds}</span>
+    </Digits>
   )
 }
 

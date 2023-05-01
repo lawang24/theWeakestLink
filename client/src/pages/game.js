@@ -18,7 +18,7 @@ class Game extends Component {
       turn: false,
       gameStarted: false,
       players: {},
-      scorecard: {}, 
+      scorecard: {},
       canSubmitMove: false,
       whiteTurn: false,
       isCheckmate: false,
@@ -27,10 +27,11 @@ class Game extends Component {
       white_time: 600,
       black_time: 600,
     }
-    this.increment_whitetime = this.increment_whitetime.bind(this);
-    this.increment_blacktime = this.increment_blacktime.bind(this);
+    // this.increment_whitetime = this.increment_whitetime.bind(this);
+    // this.increment_blacktime = this.increment_blacktime.bind(this);
   };
 
+  // socket client reactions to server events
   componentDidMount() {
     this.props.socket.on("nextTurn", (weakest, isWhiteTurn, ratings, scorecard) => {
       console.log(weakest);
@@ -39,7 +40,7 @@ class Game extends Component {
       game.load(weakest);
 
       // if no longer your turn, update last turn's ratings so you can see who's the bum
-      if (this.props.isWhite !== isWhiteTurn) this.setState({ ratings: ratings }); 
+      if (this.props.isWhite !== isWhiteTurn) this.setState({ ratings: ratings });
 
       // check if checkmate
       if (game.isCheckmate() === true) this.setState({ gameStarted: false, isCheckmate: true })
@@ -55,28 +56,33 @@ class Game extends Component {
 
     this.props.socket.on("begin_game", (scorecard) => {
       const Scorecard = JSON.parse(scorecard);
-      this.setState({ 
-      whiteTurn: true, 
-      gameStarted: true, 
-      scorecard: Scorecard, 
-      fen: "start", 
-      isCheckmate: false,
-      timeOut: false,
-      white_time: 600,
-      black_time: 600,
-    });
+      this.setState({
+        whiteTurn: true,
+        gameStarted: true,
+        scorecard: Scorecard,
+        fen: "start",
+        isCheckmate: false,
+        timeOut: false,
+        white_time: 600,
+        black_time: 600,
+      });
       if (this.props.isWhite) this.setState({ turn: true, canSubmitMove: true });
 
       game.reset(); // restart the game
-      
+
     })
 
     this.props.socket.on("time_out", () => {
       this.setState({ gameStarted: false, timeOut: true });
     })
 
-  };
+    this.props.socket.on("update_timer", (timer) => {
+      this.setState({ white_time: timer[0], black_time: timer[1] });
+    });
 
+  }
+
+  // send the client's rating to the server
   sendRating = (rating, position) => {
     this.props.socket.emit("send_rating", rating, position, this.props.roomCode, this.props.isWhite, this.props.username);
   };
@@ -157,18 +163,15 @@ class Game extends Component {
     };
   };
 
-  increment_whitetime = () => {
-    this.setState((state) => ({
-      white_time: state.white_time - 1
-    }));
-  };
+  // increment_whitetime = (time) => {
+  //   this.setState( {white_time : time } ) 
+  // }
 
-  increment_blacktime = () => {
-    this.setState((state) => ({
-      black_time: state.black_time - 1
-    }));
-  };
-
+  // increment_blacktime = () => {
+  //   this.setState((state) => ({
+  //     black_time: state.black_time - 1
+  //   }));
+  // };
 
   render() {
 
@@ -240,9 +243,8 @@ class Game extends Component {
             <h1 style={{ color: "#FFFFFF" }}>{Gameover()}</h1>
             <div style={{ display: "flex", height: "8%", width: "30%", justifyContent: "center", alignItems: "center" }}>
 
-              <CountdownTimer totalSeconds={this.state.white_time} increment={this.increment_whitetime} isRunning={this.state.whiteTurn} />
-              <CountdownTimer totalSeconds={this.state.black_time} increment={this.increment_blacktime}
-                isRunning={(!this.state.whiteTurn && this.state.gameStarted)} />
+              <CountdownTimer totalSeconds={this.state.white_time} isRunning={this.state.whiteTurn} />
+              <CountdownTimer totalSeconds={this.state.black_time} isRunning={(!this.state.whiteTurn && this.state.gameStarted)} />
 
             </div>
           </GameplaySection>

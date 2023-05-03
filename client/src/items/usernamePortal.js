@@ -1,11 +1,38 @@
 import styled from "styled-components";
-import {Arrow,Button} from "../StyledComponents";
+import { Arrow, Button } from "../StyledComponents";
+import { usePlayerContext } from '../contexts/PlayerContext';
 
-export const UsernamePortal = ({ host, username, setUsername, joinRoom, newRoom, setHost, setisHomescreen }) => {
-  const handleSubmit = host ? newRoom : joinRoom;
+export const UsernamePortal = ({ setisHomescreen }) => {
+
+  const { socket,
+    setInRoom,
+    roomCode,
+    host,
+    setHost,
+    username,
+    setUsername,
+  } = usePlayerContext();
+
+  const joinRoom = () => {
+    socket.emit("join_room", roomCode, username);
+    setInRoom(true);
+  }
+
+  const newRoom = () => {
+    socket.emit("create_room", username);
+    setHost(true);
+    setInRoom(true);
+  }
+
+  // decides whether the SUBMIT button creates or joins a room
+  function handleSubmit(event) {
+    event.preventDefault();
+    host ? newRoom(event) : joinRoom(event);
+  }
+  
   return (
     <UsernamePanel>
-      <BackButton onSubmit={() => {
+      <BackButton onClick={() => {
         setHost(false); setisHomescreen(true)
       }
       }>

@@ -2,13 +2,13 @@
 
 import { createContext, useContext, useState } from 'react';
 
-const PlayerContext = createContext();
+export const PlayerContext = createContext();
 
 export function usePlayerContext() {
   return useContext(PlayerContext);
 }
 
-export function PlayerProvider({ children, socket }) {
+export function PlayerProvider({ children , socket }) {
   const [isInRoom, setInRoom] = useState(false);
   const [roomCode, setRoomCode] = useState("");
   const [host, setHost] = useState(false);
@@ -16,6 +16,7 @@ export function PlayerProvider({ children, socket }) {
   const [isWhite, setIsWhite] = useState(true);
 
   const value = {
+    socket,
     isInRoom,
     setInRoom,
     roomCode,
@@ -26,8 +27,8 @@ export function PlayerProvider({ children, socket }) {
     setUsername,
     isWhite,
     setIsWhite,
-    socket,
   };
-
+  
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
+  
 }

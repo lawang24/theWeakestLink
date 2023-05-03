@@ -1,41 +1,43 @@
-//importing helper functions
 import { newPlayer, chooseWeakest, turnIsOver, makeid, deletePlayer } from "./helpers.js";
 import Timer from "./timer.js";
-
-const port = 3001;
-
-// setting up the server
 import express from 'express';
-const app = express();
+import cors from 'cors';
 import http from "http";
-const server = http.createServer(app);
-import { Server } from 'socket.io';
-
-
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { dirname } from 'path';
+
+const port = 3001;
+
+const app = express();
+app.use(cors);
+
+const server = http.createServer(app);
+import { Server } from 'socket.io';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-console.log(path.join(__dirname,'..','client','build'));
-console.log(path.join(__dirname,'..','client','build','index.html'));
-
+// console.log(path.join(__dirname,'..','client','build'));
+// console.log(path.join(__dirname,'..','client','build','index.html'));
 
 const io = new Server(server, {
-
+    cors: {
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST"]
+      }
 });
 
-app.use(express.static(path.join(__dirname,'..','client','build')));
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname,'..','client','build','index.html'));
-})
+// app.use(express.static(path.join(__dirname,'..','client','build')));
+// app.get('/', (req, res) => {
+//     res.sendFile(path.join(__dirname,'..','client','build','index.html'));
+// })
 
 
 // setting up game stuff
 const rooms = new Map();
 
-
+// emits to client that a team has run out of time
 const time_out = (io, roomCode) => {
     io.to(roomCode).emit("time_out");
 }
@@ -43,6 +45,7 @@ const time_out = (io, roomCode) => {
 io.on("connection", (socket) => {
     console.log('User Connected: ' + socket.id);
 
+    // 
     socket.on("send_rating", (rating, position, roomCode, isWhite, username) => {
         const team = isWhite ? 0 : 1;
         const thisRoom = rooms.get(roomCode);
@@ -56,7 +59,6 @@ io.on("connection", (socket) => {
         thisRoom.ratings[index] = rating;
         console.log("ratings: " + JSON.stringify(thisRoom.ratings));
 
-
         const teamLength = thisRoom.players[team].length;
 
         if (teamLength && teamLength === thisRoom.moves.length) {
@@ -67,9 +69,17 @@ io.on("connection", (socket) => {
             console.log(`weakest: ${weakest}`);
             // clears moves array, flips whiteTurn, updates scorecard
             turnIsOver(thisRoom, team, index);
+
+            // send the weakest move to the client
             io.to(roomCode).emit("nextTurn", weakest, thisRoom.whiteTurn, thisRoom.ratings, thisRoom.scorecard);
 
-            // starts the timer 
+            // stops the timer for the current turn
+            thisRoom.timer.stopTimer();
+
+            // send the updated timer to the client
+            io.to(roomCode).emit("update_timer", thisRoom.timer.getTimer());
+
+            // starts the timer for the next turn
             thisRoom.timer.nextTurn(thisRoom.whiteTurn, time_out, io, roomCode);
         }
     });
@@ -88,11 +98,12 @@ io.on("connection", (socket) => {
         while (rooms.has(roomCode)) {
             roomCode = makeid(4);
         };
-
         rooms.set(roomCode, { players: [[], []], scorecard: [], moves: [], whiteTurn: true, timer: new Timer([600, 600]), ratings: [] });
         socket.join(roomCode);
         const thisRoom = rooms.get(roomCode);
+        console.log("test:" + thisRoom);
         newPlayer(thisRoom, username);
+        console.log("roomcode: "+ roomCode);
         socket.emit("room_joined", roomCode, isWhite);
         io.to(roomCode).emit("update_players", JSON.stringify(rooms.get(roomCode).players))
     });
@@ -104,6 +115,7 @@ io.on("connection", (socket) => {
     socket.on("change_team", (isWhite, roomCode, username) => {
 
         // delete player off the old team
+        console.log(roomCode);
         const teams = rooms.get(roomCode).players;
         deletePlayer(isWhite, teams, username);
 
@@ -130,23 +142,25 @@ io.on("connection", (socket) => {
 
     });
 
-    socket.on("disconnecting", () => {
-        const roomCode = Array.from(socket.rooms).pop();
-        const playerCount = (io.sockets.adapter.rooms.get(roomCode).size); // number of players in room
+    // socket.on("disconnecting", () => {
+    //     const roomCode = Array.from(socket.rooms).pop();
+    //     const playerCount = (io.sockets.adapter.rooms.get(roomCode).size); // number of players in room
 
-        // free memory if everybody gone
-        if (playerCount == 1) {
-            rooms.get(roomCode).timer.stopTimer(); // stop all timers etc
-            rooms.delete(roomCode);
-        };
-    });
+    //     // free memory if everybody gone
+    //     if (playerCount == 1) {
+    //         rooms.get(roomCode).timer.stopTimer(); // stop all timers etc
+    //         rooms.delete(roomCode);
+    //     };
+    // });
 
 
 });
 
-server.listen(process.env.PORT || port, () => {
+// server.listen(process.env.PORT || port, () => {
+//     console.log(`server is on port ${port}`)
+// });
+
+server.listen( process.env.PORT || port ,  () => {
     console.log(`server is on port ${port}`)
 });
-
-
 

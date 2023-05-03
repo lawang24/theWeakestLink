@@ -32,7 +32,7 @@ class Timer {
 
     nextTurn(isWhite, callback, io, roomCode) {
         const team = isWhite ? 0 : 1;
-        clearInterval(this.#timer);
+        // clearInterval(this.#timer);
         this.#timer = setInterval(() => {
             this.#timeLeft[team]--;
             if (this.#timeLeft[team] <= 0) {

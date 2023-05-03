@@ -3,33 +3,52 @@ import { Logo, Wrapper } from "../StyledComponents";
 import { useState, useEffect } from 'react';
 import { MainLobbyPortal } from "../items/mainLobbyPortal";
 import { UsernamePortal } from "../items/usernamePortal";
+import { usePlayerContext } from '../contexts/PlayerContext';
 
-function JoinRoom({ socket, joinRoom, roomCode, setRoomCode, newRoom, username, setUsername, host, setHost }) {
+function roomListeners(socket, setisHomescreen) {
+
+  socket.on("yes_room", () => {
+    setisHomescreen(false);
+  });
+
+  socket.on("no_room", () => {
+    alert("Game Not Found");
+    console.log("alert!");
+  });
+
+};
+
+function JoinRoom() {
   const [isHomescreen, setisHomescreen] = useState(true);
+
+  const { socket,
+    setInRoom,
+    roomCode,
+    setRoomCode,
+    setIsWhite,
+  } = usePlayerContext();
+
+  // sets up listeners for room handling
+  useEffect(() => {
+    roomListeners(socket, setisHomescreen);
+    // Clean up event listeners on unmount
+    return () => {
+      socket.removeAllListeners();
+    };
+  }, [socket, setInRoom, setRoomCode, setIsWhite, setisHomescreen]);
 
   const isRoomValid = (event) => {
     event.preventDefault();
     socket.emit("is_room_valid?", roomCode);
   }
 
-  useEffect(() => {
-    socket.on("yes_room", () => setisHomescreen(false));
-    socket.on("no_room", () => {
-      alert("Game Not Found");
-      console.log("alert!");
-    });
-  }, [socket])
-
   return (
     <Wrapper>
       <Logo style={{ height: "20%", width: "auto" }}></Logo>
       <Description>A TEAM-BASED CHESS GAME</Description>
       {isHomescreen ?
-        <MainLobbyPortal roomCode={roomCode} setRoomCode={setRoomCode} setHost={setHost}
-          setisHomescreen={setisHomescreen} isRoomValid={isRoomValid} /> :
-        <UsernamePortal joinRoom={joinRoom} newRoom={newRoom} host={host}
-          setHost={setHost} setisHomescreen={setisHomescreen}
-          username={username} setUsername={setUsername} />
+        <MainLobbyPortal isRoomValid={isRoomValid} setisHomescreen={setisHomescreen} /> :
+        <UsernamePortal setisHomescreen={setisHomescreen} />
       }
     </Wrapper>
   );

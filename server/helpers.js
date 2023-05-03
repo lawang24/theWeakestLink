@@ -1,5 +1,6 @@
 export function newPlayer(thisRoom, username) {
     let isWhite;
+    if (!thisRoom.players.length) return true;
 
     if (thisRoom.players[0].length <= thisRoom.players[1].length) {
         thisRoom.players[0].push(username);

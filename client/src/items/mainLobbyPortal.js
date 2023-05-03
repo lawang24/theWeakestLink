@@ -1,34 +1,40 @@
 import styled from "styled-components";
 import { Button } from "../StyledComponents";
+import { usePlayerContext } from "../contexts/PlayerContext";
 
-export const MainLobbyPortal = ({ roomCode, setRoomCode, setHost, setisHomescreen, isRoomValid }) => {
+export const MainLobbyPortal = ({ isRoomValid, setisHomescreen }) => {
 
-    return (
-      <ControlPanelWrapper>
-        <ControlPanelButton>
-          <Form onSubmit={isRoomValid}>
-            <RoomCode
-              type="text"
-              placeholder="ROOM CODE"
-              value={roomCode}
-              onChange={(e) => setRoomCode(e.target.value)}
-            />
-            <JoinButton type="submit">JOIN ROOM</JoinButton>
-          </Form>
-        </ControlPanelButton>
-        {/* <HR></HR> */}
-        <ControlPanelButton>
-          <Form onSubmit={() => {
-            setHost(true); setisHomescreen(false);
-          }}>
-            <NewRoom type="submit">NEW ROOM</NewRoom>
-          </Form>
-        </ControlPanelButton>
-      </ControlPanelWrapper>
-    )
-  }
+  const {
+    roomCode,
+    setRoomCode,
+    setHost,
+  } = usePlayerContext();
 
-  export default MainLobbyPortal;
+  return (
+    <ControlPanelWrapper>
+      <ControlPanelButton>
+        <Form onSubmit={isRoomValid}>
+          <RoomCode
+            type="text"
+            placeholder="ROOM CODE"
+            value={roomCode}
+            onChange={(e) => setRoomCode(e.target.value)}
+          />
+          <JoinButton type="submit">JOIN ROOM</JoinButton>
+        </Form>
+      </ControlPanelButton>
+      <ControlPanelButton>
+        <Form onSubmit={() => {
+          setHost(true); setisHomescreen(false);
+        }}>
+          <NewRoom type="submit">NEW ROOM</NewRoom>
+        </Form>
+      </ControlPanelButton>
+    </ControlPanelWrapper>
+  )
+}
+
+export default MainLobbyPortal;
 
 const ControlPanelWrapper = styled.div`
 display:flex;

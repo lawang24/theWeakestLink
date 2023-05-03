@@ -5,7 +5,7 @@ import './App.css'
 import { Wrapper } from './StyledComponents';
 import { PlayerProvider, usePlayerContext } from './contexts/PlayerContext';
 
-const socket = io('http://localhost:3001');
+const socket = io('https://weakestlinkclient.herokuapp.com');
 
 function AppContent() {
   const {isInRoom } = usePlayerContext();

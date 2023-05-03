@@ -10,7 +10,7 @@ import { dirname } from 'path';
 const port = 3001;
 
 const app = express();
-app.use(cors);
+app.use(cors());
 
 const server = http.createServer(app);
 import { Server } from 'socket.io';
@@ -23,7 +23,7 @@ const __dirname = dirname(__filename);
 
 const io = new Server(server, {
     cors: {
-        origin: "https://master--lively-zabaione-b79f9e.netlify.app",
+        origin: "*",
         methods: ["GET", "POST"]
       }
 });

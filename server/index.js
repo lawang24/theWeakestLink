@@ -23,7 +23,7 @@ const __dirname = dirname(__filename);
 
 const io = new Server(server, {
     cors: {
-        origin: "https://master--lively-zabaione-b79f9e.netlify.app/",
+        origin: "https://master--lively-zabaione-b79f9e.netlify.app",
         methods: ["GET", "POST"]
       }
 });

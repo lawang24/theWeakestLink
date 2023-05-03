@@ -142,17 +142,16 @@ io.on("connection", (socket) => {
 
     });
 
-    // socket.on("disconnecting", () => {
-    //     const roomCode = Array.from(socket.rooms).pop();
-    //     const playerCount = (io.sockets.adapter.rooms.get(roomCode).size); // number of players in room
+    socket.on("disconnecting", () => {
+        const roomCode = Array.from(socket.rooms).pop();
+        const playerCount = (io.sockets.adapter.rooms.get(roomCode).size); // number of players in room
 
-    //     // free memory if everybody gone
-    //     if (playerCount == 1) {
-    //         rooms.get(roomCode).timer.stopTimer(); // stop all timers etc
-    //         rooms.delete(roomCode);
-    //     };
-    // });
-
+        // free memory if everybody gone
+        if (playerCount == 1) {
+            rooms.get(roomCode).timer.stopTimer(); // stop all timers etc
+            rooms.delete(roomCode);
+        };
+    });
 
 });
 

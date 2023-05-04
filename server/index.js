@@ -3,9 +3,8 @@ import Timer from "./timer.js";
 import express from 'express';
 import cors from 'cors';
 import http from "http";
-import { fileURLToPath } from 'url';
-import path from 'path';
-import { dirname } from 'path';
+import { Server } from 'socket.io';
+
 
 const port = 3001;
 
@@ -13,26 +12,14 @@ const app = express();
 app.use(cors());
 
 const server = http.createServer(app);
-import { Server } from 'socket.io';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// console.log(path.join(__dirname,'..','client','build'));
-// console.log(path.join(__dirname,'..','client','build','index.html'));
 
 const io = new Server(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
-      }
+    }
 });
-
-// app.use(express.static(path.join(__dirname,'..','client','build')));
-// app.get('/', (req, res) => {
-//     res.sendFile(path.join(__dirname,'..','client','build','index.html'));
-// })
-
 
 // setting up game stuff
 const rooms = new Map();
@@ -103,7 +90,7 @@ io.on("connection", (socket) => {
         const thisRoom = rooms.get(roomCode);
         console.log("test:" + thisRoom);
         newPlayer(thisRoom, username);
-        console.log("roomcode: "+ roomCode);
+        console.log("roomcode: " + roomCode);
         socket.emit("room_joined", roomCode, isWhite);
         io.to(roomCode).emit("update_players", JSON.stringify(rooms.get(roomCode).players))
     });
@@ -147,8 +134,11 @@ io.on("connection", (socket) => {
         const playerCount = (io.sockets.adapter.rooms.get(roomCode).size); // number of players in room
 
         // free memory if everybody gone
-        if (playerCount == 1) {
-            rooms.get(roomCode).timer.stopTimer(); // stop all timers etc
+        if (playerCount == 1 && !rooms.has(roomCode)) {
+            const room = rooms.get(roomCode);
+            if (room) {
+                room.timer.stopTimer(); // stop all timers etc
+            }
             rooms.delete(roomCode);
         };
     });
@@ -159,7 +149,7 @@ io.on("connection", (socket) => {
 //     console.log(`server is on port ${port}`)
 // });
 
-server.listen( process.env.PORT || port ,  () => {
+server.listen(process.env.PORT || port, () => {
     console.log(`server is on port ${port}`)
 });
 

@@ -13,7 +13,6 @@ app.use(cors());
 
 const server = http.createServer(app);
 
-
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -134,13 +133,19 @@ io.on("connection", (socket) => {
         const playerCount = (io.sockets.adapter.rooms.get(roomCode).size); // number of players in room
 
         // free memory if everybody gone
-        if (playerCount == 1 && !rooms.has(roomCode)) {
+        if (playerCount == 1 && rooms.has(roomCode)) {
             const room = rooms.get(roomCode);
             if (room) {
                 room.timer.stopTimer(); // stop all timers etc
             }
             rooms.delete(roomCode);
         };
+
+        // print remaining rooms
+        const roomsArray = [...rooms.keys()];
+        console.log("Open Rooms:")
+        console.log(roomsArray);
+        
     });
 
 });

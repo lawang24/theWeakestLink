@@ -5,14 +5,16 @@ import './App.css'
 import { Wrapper } from './StyledComponents';
 import { PlayerProvider, usePlayerContext } from './contexts/PlayerContext';
 
-const socket = io('https://weakestlinkserver.herokuapp.com');
+// const socket = io('https://weakestlinkserver.herokuapp.com');
+const socket = io('http://localhost:3001');
 
-function AppContent() {
+
+const AppContent = () => {
   const {isInRoom } = usePlayerContext();
   return isInRoom ? <Game /> : <JoinRoom />;
 }
 
-function App() {
+const App = () => {
   return (
     <Wrapper>
       <PlayerProvider socket={socket}>

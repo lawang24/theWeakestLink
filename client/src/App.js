@@ -5,8 +5,8 @@ import './App.css'
 import { Wrapper } from './StyledComponents';
 import { PlayerProvider, usePlayerContext } from './contexts/PlayerContext';
 
-// const socket = io('https://weakestlinkserver.herokuapp.com');
-const socket = io('http://localhost:3001');
+const socket = io('https://weakestlinkserver.herokuapp.com');
+// const socket = io('http://localhost:3001');
 
 
 const AppContent = () => {

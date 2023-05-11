@@ -1,6 +1,12 @@
 import styled from "styled-components";
-import { Tower } from "../StyledComponents/gameComponents"
 import { useState, useEffect } from "react";
+import whiteTower from "../images/tower_white.png"
+import blackTower from "../images/tower_black.png"
+
+const Tower = (props) => {
+  if (props.isWhite) return <img style={props.style} src={whiteTower} alt="logo" />
+  else return <img style={props.style} src={blackTower} alt="logo" />
+}
 
 export const Teams = ({ players, isWhite, scorecard, gameStarted }) => {
   const team = isWhite ? 0 : 1;

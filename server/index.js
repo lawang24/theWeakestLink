@@ -5,7 +5,6 @@ import cors from 'cors';
 import http from "http";
 import { Server } from 'socket.io';
 
-
 const port = 3001;
 
 const app = express();
@@ -84,7 +83,7 @@ io.on("connection", (socket) => {
         while (rooms.has(roomCode)) {
             roomCode = makeid(4);
         };
-        rooms.set(roomCode, { players: [[], []], scorecard: [], moves: [], whiteTurn: true, timer: new Timer([600, 600]), ratings: [] });
+        rooms.set(roomCode, { players: new Map(), scorecard: [], moves: [], whiteTurn: true, timer: new Timer([600, 600]), ratings: [] });
         socket.join(roomCode);
         const thisRoom = rooms.get(roomCode);
         console.log("test:" + thisRoom);
@@ -149,10 +148,6 @@ io.on("connection", (socket) => {
     });
 
 });
-
-// server.listen(process.env.PORT || port, () => {
-//     console.log(`server is on port ${port}`)
-// });
 
 server.listen(process.env.PORT || port, () => {
     console.log(`server is on port ${port}`)

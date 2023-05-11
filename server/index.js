@@ -35,7 +35,7 @@ io.on("connection", (socket) => {
     process_move(io, socket, rooms); 
     join_room_handler(io, socket, rooms);
     create_room_handler(io, socket, rooms);
-    room_isvalid_handler(io, socket, rooms);
+    room_isvalid_handler(socket, rooms);
     change_team_handler(io, socket, rooms);
     start_game_handler(io, socket, rooms);
     disconnection_handler(io, socket, rooms);

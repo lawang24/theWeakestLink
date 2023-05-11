@@ -73,7 +73,7 @@ export const create_room_handler = (io, socket, rooms) => {
     });
 };
 
-export const room_isvalid_handler = (io, socket, rooms) => {
+export const room_isvalid_handler = (socket, rooms) => {
     socket.on("is_room_valid?", (roomCode) => {
         rooms.has(roomCode) ? socket.emit("yes_room") : socket.emit("no_room");
     });

@@ -23,6 +23,8 @@ const Game = () => {
   const [ratings, setRatings] = useState([]);
   const [whiteTime, setWhiteTime] = useState(600);
   const [blackTime, setBlackTime] = useState(600);
+  const [whiteTeam, setWhiteTeam] = useState(new Map());
+  const [blackTeam, setBlackTeam] = useState(new Map());
 
   const { socket,
     roomCode,
@@ -42,37 +44,35 @@ const Game = () => {
       setIsWhite(isWhite);
     });
   
-    socket.on("nextTurn", (weakest, isWhiteTurn, ratings, scorecard) => {
-      console.log(weakest);
-      console.log(scorecard);
-      setFen(weakest);
-      setScorecard(scorecard);
-      game.load(weakest);
-
-      // if no longer your turn, update last turn's ratings so you can see who's the bum
-      if (isWhite !== isWhiteTurn) setRatings(ratings);
-
-      // check if checkmate
+    socket.on("next_turn",  (worst_fen, nowWhiteTurn) => {
+      setFen(worst_fen);
+      game.load(worst_fen);
+         
+      // check game conditions
       if (game.isCheckmate() === true) {
-        setGameStarted(false);
         setIsCheckmate(true);
-      } else {
+        setGameStarted(false);
+      }
+      // allow the proper players to move 
+      else {
         setWhiteTurn((whiteTurn) => !whiteTurn);
         setTurn((turn) => !turn);
-        if (isWhite === isWhiteTurn) setCanSubmitMove(true);
+        if (isWhite === nowWhiteTurn) setCanSubmitMove(true);
       }
 
     });
 
-    socket.on("update_players", (teams) => {
-      setPlayers(JSON.parse(teams));
+    socket.on("update_white_team", (white_team) => {
+      setWhiteTeam(new Map(JSON.parse(white_team)));
     });
 
-    socket.on("begin_game", (scorecard) => {
-      const Scorecard = JSON.parse(scorecard);
+    socket.on("update_black_team", (black_team) => {
+      setBlackTeam(new Map(JSON.parse(black_team)));
+    });
+
+    socket.on("begin_game", () => {
       setWhiteTurn(true);
       setGameStarted(true);
-      setScorecard(Scorecard);
       setFen("start");
       setIsCheckmate(false);
       setTimeOut(false);
@@ -83,7 +83,6 @@ const Game = () => {
         setTurn(true);
         setCanSubmitMove(true);
       }
-
       game.reset(); // restart the game
     });
 
@@ -243,11 +242,11 @@ const Game = () => {
           <div style={{ display: "flex", "flex-flow": "row wrap", "justify-content": "center", height: "fit-content", width: "100%", "margin-top": "17%" }}>
             <TeamSection>
               <TeamName color="white">WHITE</TeamName>
-              <Teams players={players} isWhite={true} scorecard={scorecard} gameStarted={gameStarted} />
+              <Teams team={whiteTeam} isWhite={true}  gameStarted={gameStarted} />
             </TeamSection>
             <TeamSection>
               <TeamName>BLACK</TeamName>
-              <Teams players={players} isWhite={false} scorecard={scorecard} gameStarted={gameStarted} />
+              <Teams team={blackTeam} isWhite={false} gameStarted={gameStarted} />
             </TeamSection>
           </div>
 

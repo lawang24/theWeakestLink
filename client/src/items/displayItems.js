@@ -8,27 +8,23 @@ const Tower = (props) => {
   else return <img style={props.style} src={blackTower} alt="logo" />
 }
 
-export const Teams = ({ players, isWhite, scorecard, gameStarted }) => {
-  const team = isWhite ? 0 : 1;
+export const Teams = ({ team, isWhite, gameStarted }) => {
 
-  const Icon = ({ index }) => {
+  if (!team) return;
+
+  const Icon = ({ player }) => {
     if (!gameStarted) return <Tower isWhite={isWhite} style={{ height: "22px", paddingRight: "8px" }} />
-    return <ScoreNumber>{scorecard[team][index]}</ScoreNumber>
+    return <ScoreNumber>{player._scorecard}</ScoreNumber>
   }
-
-  if (Object.keys(players).length === 0)
-    return;
 
   return (
     <Members>
-      {players[team].map((player, index) => {
-        return (
-          <div style={{ display: "flex", width: "100%", justifyContent: "start", height: "fit-content", marginBottom: "10px" }}>
-            <Icon index={index} />
-            <li style={{ color: "#FFFFFF", height: "fit-content" }} key={player}> {player} </li>
-          </div>
-        )
-      })}
+      {Array.from(team, ([username, information]) => (
+        <div style={{ display: "flex", width: "100%", justifyContent: "start", height: "fit-content", marginBottom: "10px" }} key={username}>
+          <Icon player={information} />
+          <li style={{ color: "#FFFFFF", height: "fit-content" }}> {username} </li>
+        </div>
+      ))}
     </Members>
   )
 }

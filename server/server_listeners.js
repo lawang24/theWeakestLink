@@ -1,43 +1,50 @@
-import { chooseWeakest, turnIsOver, newPlayer, makeid } from "./helpers.js";
+import { newPlayer, makeid } from "./helpers.js";
 import Timer from "./timer.js";
+import { Player } from "./Player.js";
 
 export const process_move = (io, socket, rooms) => {
+
     socket.on("send_rating", (rating, position, roomCode, isWhite, username) => {
-        const team = isWhite ? 0 : 1;
-        const thisRoom = rooms.get(roomCode);
+        const this_room = rooms.get(roomCode);
+        const team = isWhite ? this_room.white_team : this_room.black_team;
+        const player = team.get(username);
 
-        // enters the player's move into move array (for calculation of weakest)
-        thisRoom.moves.push({ rating, position });
-        console.log("moves: " + JSON.stringify(thisRoom.moves));
+        player._move_fen = position;
+        player._move_rating = rating;
 
-        // enters the rating into rating array for display of ratings
-        const index = thisRoom.players[team].indexOf(username);
-        thisRoom.ratings[index] = rating;
-        console.log("ratings: " + JSON.stringify(thisRoom.ratings));
+        this_room.moves_submitted++;
 
-        const teamLength = thisRoom.players[team].length;
+        // triggers once everyone's votes are in
+        if (team.size != 0 && team.size === this_room.moves_submitted) {
 
-        // if everyone submits their moves
-        if (teamLength && teamLength === thisRoom.moves.length) {
-            const position_and_index = chooseWeakest(thisRoom.moves);
-            const weakest = position_and_index[0];
-            const index = position_and_index[1];
+            let lowest_rating = Infinity;
+            let worst_fen = "";
+            let weakest_player = "";
 
-            console.log(`weakest: ${weakest}`);
-            // clears moves array, flips whiteTurn, updates scorecard
-            turnIsOver(thisRoom, team, index);
+            team.forEach((player, username) => {
+                if (player._move_rating < lowest_rating) {
+                    lowest_rating = player._move_rating;
+                    worst_fen = player._move_fen;
+                    weakest_player = username;
+                }
+            });
 
-            // send the weakest move to the client
-            io.to(roomCode).emit("nextTurn", weakest, thisRoom.whiteTurn, thisRoom.ratings, thisRoom.scorecard);
+            // update room state
+            team.get(weakest_player)._scorecard++;
+            this_room.whiteTurn = !this_room.whiteTurn;
+            this_room.moves_submitted = 0;
 
-            // stops the timer for the current turn
-            thisRoom.timer.stopTimer();
 
-            // send the updated timer to the client
-            io.to(roomCode).emit("update_timer", thisRoom.timer.getTimer());
+            isWhite ? io.to(roomCode).emit("update_white_team", JSON.stringify(Array.from(team)))
+                : io.to(roomCode).emit("update_black_team", JSON.stringify(Array.from(team)));
 
-            // starts the timer for the next turn
-            thisRoom.timer.nextTurn(thisRoom.whiteTurn, time_out, io, roomCode);
+            io.to(roomCode).emit("next_turn", worst_fen, this_room.whiteTurn);
+
+            // update timer
+            this_room.timer.stopTimer();
+            io.to(roomCode).emit("update_timer", this_room.timer.getTimer());
+            this_room.timer.nextTurn(this_room.whiteTurn, time_out, io, roomCode);
+
         }
     });
 };
@@ -57,21 +64,56 @@ export const create_room_handler = (io, socket, rooms) => {
         let roomCode;
         const isWhite = true;
 
-        // generate a unique roomcode
+        // regenerate until reach a unique roomcode
         do {
             roomCode = makeid(4);
         } while (rooms.has(roomCode));
 
-        rooms.set(roomCode, { players: [[], []], scorecard: [], moves: [], whiteTurn: true, timer: new Timer([600, 600]), ratings: [] });
-        socket.join(roomCode);
+        rooms.set(roomCode, {
+            white_team: new Map(),
+            black_team: new Map(),
+            whiteTurn: true,
+            timer: new Timer([600, 600]),
+            moves_submitted: 0
+        });
+
         const thisRoom = rooms.get(roomCode);
-        console.log("test:" + thisRoom);
         newPlayer(thisRoom, username);
-        console.log("roomcode: " + roomCode);
+        socket.join(roomCode);
+
+        console.log("Room Joined: " + roomCode);
         socket.emit("room_joined", roomCode, isWhite);
-        io.to(roomCode).emit("update_players", JSON.stringify(rooms.get(roomCode).players))
+
+        io.to(roomCode).emit("update_white_team", JSON.stringify(Array.from(thisRoom.white_team)));
     });
 };
+
+export const change_team_handler = (io, socket, rooms) => {
+    socket.on("change_team", (isWhite, roomCode, username) => {
+
+        const thisRoom = rooms.get(roomCode);
+
+        const teams = {
+            oldTeam: isWhite ? thisRoom.white_team : thisRoom.black_team,
+            newTeam: isWhite ? thisRoom.black_team : thisRoom.white_team
+        };
+
+        // update teams
+        teams.oldTeam.delete(username);
+        teams.newTeam.set(username, new Player());
+
+        // add to the new team first so the maximum height is more stable
+        // that way it doesn't flicker the screen
+        if (isWhite) {
+            io.to(roomCode).emit("update_black_team", JSON.stringify(Array.from(thisRoom.black_team)));
+            io.to(roomCode).emit("update_white_team", JSON.stringify(Array.from(thisRoom.white_team)));
+        }
+        else {
+            io.to(roomCode).emit("update_white_team", JSON.stringify(Array.from(thisRoom.white_team)));
+            io.to(roomCode).emit("update_black_team", JSON.stringify(Array.from(thisRoom.black_team)));
+        }
+    });
+}
 
 export const room_isvalid_handler = (socket, rooms) => {
     socket.on("is_room_valid?", (roomCode) => {
@@ -79,42 +121,16 @@ export const room_isvalid_handler = (socket, rooms) => {
     });
 };
 
-export const change_team_handler = (io, socket, rooms) => {
-    socket.on("change_team", (isWhite, roomCode, username) => {
-
-        // delete player off the old team
-        console.log(roomCode);
-        const teams = rooms.get(roomCode).players;
-        deletePlayer(isWhite, teams, username);
-
-        // in on the new team
-        const newTeam = isWhite ? 1 : 0;
-        teams[newTeam].push(username);
-        console.log(rooms.get(roomCode).players);
-        console.log(`the teams are ${JSON.stringify(teams)}`)
-        io.to(roomCode).emit("update_players", JSON.stringify(teams));
-    });
-}
-
 export const start_game_handler = (io, socket, rooms) => {
     socket.on("start_game", (roomCode) => {
         const thisRoom = rooms.get(roomCode);
-
-        // create the scorecards
-        thisRoom.scorecard = [];
-        thisRoom.ratings = [];
-        thisRoom.scorecard.push(new Array(thisRoom.players[0].length).fill(0));
-        thisRoom.scorecard.push(new Array(thisRoom.players[1].length).fill(0));
-        thisRoom.timer.setTimer([600, 600]);
         thisRoom.timer.startTimer(time_out, io, roomCode);
-        console.log(thisRoom);
-        io.to(roomCode).emit("begin_game", JSON.stringify(thisRoom.scorecard));
-
+        io.to(roomCode).emit("begin_game");
     });
 }
 
 export const disconnection_handler = (io, socket, rooms) => {
-    
+
     socket.on("disconnecting", () => {
         const roomCode = Array.from(socket.rooms).pop();
         const playerCount = (io.sockets.adapter.rooms.get(roomCode).size); // number of players in room
@@ -140,3 +156,4 @@ export const disconnection_handler = (io, socket, rooms) => {
 const time_out = (io, roomCode) => {
     io.to(roomCode).emit("time_out");
 }
+

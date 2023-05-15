@@ -1,5 +1,5 @@
 import Chessboard from "chessboardjsx";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Logo, SettingButton } from "../StyledComponents"
 import { GameWrapper, RoomCode as RoomCodeButton, ChangeTeam, TeamName, StartGame, GameplaySection } from "../StyledComponents/gameComponents"
 import { TeamSection } from "../StyledComponents/gameComponents";
@@ -22,6 +22,7 @@ const Game = () => {
   const [blackTime, setBlackTime] = useState(600);
   const [whiteTeam, setWhiteTeam] = useState(new Map());
   const [blackTeam, setBlackTeam] = useState(new Map());
+  const proposedMove = useRef("");
 
   const { socket,
     roomCode,
@@ -32,7 +33,7 @@ const Game = () => {
     username,
   } = usePlayerContext();
 
-  let proposedMove;
+  ;
 
   useEffect(() => {
 
@@ -93,12 +94,17 @@ const Game = () => {
       setBlackTime(timer[1]);
     });
 
+    if (isCheckmate || timeOut) {
+      socket.emit("stop_game", roomCode);
+      setTurn(false);
+      setCanSubmitMove(false);
+  }
 
     return () => {
       socket.removeAllListeners();
     }
 
-  }, [isWhite, setIsWhite, setRoomCode, socket]);
+  }, [isCheckmate, isWhite, roomCode, setIsWhite, setRoomCode, socket, timeOut]);
 
   // send the client's rating to the server
   const sendRating = (rating, position) => {
@@ -118,8 +124,8 @@ const Game = () => {
     if (move === null) return; // illegal move  
     console.log(game.fen());
     // grab player proposed position and show it
-    proposedMove = game.fen();
-    setFen(proposedMove);
+    proposedMove.current = game.fen();
+    setFen(proposedMove.current);
     setCanSubmitMove(false);
 
     game.undo();
@@ -152,8 +158,8 @@ const Game = () => {
     const evalMove = () => {
       if (!game.isGameOver()) {
         engine.postMessage("ucinewgame");
-        console.log("proposedMove:"+ proposedMove)
-        engine.postMessage("position fen " + proposedMove);
+        console.log("proposedMove.current:"+ proposedMove.current)
+        engine.postMessage("position fen " + proposedMove.current);
         engine.postMessage("eval");
       }
     };
@@ -169,7 +175,7 @@ const Game = () => {
       if (line.substr(0, "Total Evaluation".length) === "Total Evaluation") {
         let score = parseFloat(line.substr(18).substr(0, 4));
         if (!isWhite) score = score * -1;
-        sendRating(score, proposedMove);
+        sendRating(score, proposedMove.current);
       }
     };
 
@@ -197,7 +203,9 @@ const Game = () => {
 
   const StartGameButton = () => {
     if (host)
-      return (<StartGame onClick={() => socket.emit("start_game", roomCode)}>START</StartGame>);
+      return (<StartGame onClick={() => {
+        socket.emit("start_game", roomCode)
+        }}>START</StartGame>);
   };
 
   const GameControls = () => {
@@ -213,14 +221,12 @@ const Game = () => {
 
   const Gameover = () => {
     if (isCheckmate) {
-      socket.emit("stop_game", roomCode);
-      return (<div>CHECKMATE BUCKO</div>)
+        return (<div>CHECKMATE BUCKO</div>);
     }
-    else if (timeOut) {
-      socket.emit("stop_game", roomCode);
-      return (<div>{isWhite ? "WHITE" : "BLACK"} WINS ON TIME</div>)
+    if (timeOut) {
+        return (<div>{whiteTurn ? "BLACK" : "WHITE"} WINS ON TIME</div>);
     }
-  }
+}
 
   return (
     <GameWrapper>

@@ -25,6 +25,10 @@ width:100%;
 font-size:18px;
 border-radius: 3px;
 cursor: pointer;
+&:hover{
+    background-color: #ACACAC;
+    transition-duration: 0.3s;
+}
 `;
 
 export const Logo = (props) => <img style = {props.style} src={logo} alt="logo" />

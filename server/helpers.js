@@ -29,6 +29,7 @@ export function turnIsOver(thisRoom,team,index) {
     thisRoom.scorecard[team][index]++;
     console.log(thisRoom.scorecard);
 }
+
 export function makeid(length) {
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -37,4 +38,12 @@ export function makeid(length) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
+}
+
+export function reset_scorecards(this_room) {
+    ['white_team', 'black_team'].forEach(team => {
+        for (const player of this_room[team].values()) {
+            player._scorecard = 0;
+        }
+    });
 }

@@ -18,7 +18,7 @@ export const MainLobbyPortal = ({ isRoomValid, setisHomescreen }) => {
             type="text"
             placeholder="ROOM CODE"
             value={roomCode}
-            onChange={(e) => setRoomCode(e.target.value)}
+            onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
           />
           <JoinButton type="submit">JOIN ROOM</JoinButton>
         </Form>

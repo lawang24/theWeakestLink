@@ -14,7 +14,7 @@ export const Teams = ({ team, isWhite, gameStarted }) => {
 
   const Icon = ({ player }) => {
     if (!gameStarted) return <Tower isWhite={isWhite} style={{ height: "22px", paddingRight: "8px" }} />
-    return <ScoreNumber>{player._scorecard} </ScoreNumber>
+    return <ScoreNumber> {player._scorecard} </ScoreNumber>
   }
 
   return (
@@ -49,10 +49,11 @@ height: fit-content;
 margin-right: 10px;
 `
 
-export const Ratings = ({ team , gameStarted}) => {
+export const Ratings = ({ team, gameStarted }) => {
   if (!gameStarted) return;
   else return (
     <RatingList>
+      StockFish Evals:
       {Array.from(team, ([username, information]) => {
         return (
           <RatingNumber> {information._move_rating} </RatingNumber>
@@ -63,13 +64,13 @@ export const Ratings = ({ team , gameStarted}) => {
 }
 
 const RatingList = styled(Members)`
+color: #FFFFFF;
 flex-direction: row;
 justify-content: center;
 width:100%;
 `;
 
 const RatingNumber = styled.li`
-color: #FFFFFF;
 height: fit-content;
 margin: 0 7px;
 `

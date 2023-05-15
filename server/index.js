@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import http from "http";
 import { Server } from 'socket.io';
-import { process_move_handler, join_room_handler, create_room_handler, disconnection_handler } from './server_listeners.js';
-import { room_is_valid_handler, change_team_handler, start_game_handler, stop_game_handler } from "./server_listeners.js";
+import { process_move_handler, join_room_handler, create_room_handler, disconnection_handler } from './server_handlers.js';
+import { room_is_valid_handler, change_team_handler, start_game_handler, stop_game_handler } from "./server_handlers.js";
 
 const port = 3001;
 

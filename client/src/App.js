@@ -4,10 +4,9 @@ import JoinRoom from "./pages/JoinRoom.js"
 import './App.css'
 import { Wrapper } from './StyledComponents';
 import { PlayerProvider, usePlayerContext } from './contexts/PlayerContext.js';
-import { heroku_server_url, port_3001_url } from './constants.js';
 
-// const socket = io(heroku_server_url); 
-const socket = io(port_3001_url);
+const socket = io('https://weakestlinkserver.herokuapp.com'); 
+// const socket = io('http://localhost:3001');
 
 const AppContent = () => {
   const {isInRoom } = usePlayerContext();

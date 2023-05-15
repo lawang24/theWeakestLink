@@ -1,8 +1,5 @@
 import styled from 'styled-components';
 import { Wrapper, Button } from "./index.js";
-import whiteTower from "../images/tower_white.png"
-import blackTower from "../images/tower_black.png"
-
 
 export const GameWrapper = styled(Wrapper)`
 flex-flow:row-reverse;
@@ -64,10 +61,7 @@ width: 30%;
 background:#868BAC;
 `;
 
-export const Tower = (props) => {
-    if (props.isWhite) return <img style={props.style} src={whiteTower} alt="logo" />
-    else return <img style={props.style} src={blackTower} alt="logo" />
-}
+
 
 
 

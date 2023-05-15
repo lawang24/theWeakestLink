@@ -1,28 +1,30 @@
 import styled from "styled-components";
-import { Tower } from "../StyledComponents/gameComponents"
 import { useState, useEffect } from "react";
+import whiteTower from "../images/tower_white.png"
+import blackTower from "../images/tower_black.png"
 
-export const Teams = ({ players, isWhite, scorecard, gameStarted }) => {
-  const team = isWhite ? 0 : 1;
+const Tower = (props) => {
+  if (props.isWhite) return <img style={props.style} src={whiteTower} alt="logo" />
+  else return <img style={props.style} src={blackTower} alt="logo" />
+}
 
-  const Icon = ({ index }) => {
+export const Teams = ({ team, isWhite, gameStarted }) => {
+
+  if (!team) return;
+
+  const Icon = ({ player }) => {
     if (!gameStarted) return <Tower isWhite={isWhite} style={{ height: "22px", paddingRight: "8px" }} />
-    return <ScoreNumber>{scorecard[team][index]}</ScoreNumber>
+    return <ScoreNumber>{player._scorecard} </ScoreNumber>
   }
-
-  if (Object.keys(players).length === 0)
-    return;
 
   return (
     <Members>
-      {players[team].map((player, index) => {
-        return (
-          <div style={{ display: "flex", width: "100%", justifyContent: "start", height: "fit-content", marginBottom: "10px" }}>
-            <Icon index={index} />
-            <li style={{ color: "#FFFFFF", height: "fit-content" }} key={player}> {player} </li>
-          </div>
-        )
-      })}
+      {Array.from(team, ([username, information]) => (
+        <div style={{ display: "flex", width: "100%", justifyContent: "start", height: "fit-content", marginBottom: "10px" }} key={username}>
+          <Icon player={information} />
+          <li style={{ color: "#FFFFFF", height: "fit-content" }}> {username} </li>
+        </div>
+      ))}
     </Members>
   )
 }
@@ -47,13 +49,13 @@ height: fit-content;
 margin-right: 10px;
 `
 
-export const Ratings = ({ ratings }) => {
-  if (ratings.length === 0) return;
+export const Ratings = ({ team , gameStarted}) => {
+  if (!gameStarted) return;
   else return (
     <RatingList>
-      {ratings.map((x, i) => {
+      {Array.from(team, ([username, information]) => {
         return (
-          <RatingNumber> {x} </RatingNumber>
+          <RatingNumber> {information._move_rating} </RatingNumber>
         )
       })}
     </RatingList>
@@ -97,7 +99,7 @@ export function CountdownTimer({ totalSeconds, isRunning }) {
 
   return (
     <Digits>
-      <span>{minutes}</span>:<span>{seconds}</span>
+      <span>{minutes}</span>:<span>{seconds < 10 ? `0${seconds}` : seconds}</span>
     </Digits>
   )
 }

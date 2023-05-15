@@ -14,7 +14,7 @@ export const Teams = ({ team, isWhite, gameStarted }) => {
 
   const Icon = ({ player }) => {
     if (!gameStarted) return <Tower isWhite={isWhite} style={{ height: "22px", paddingRight: "8px" }} />
-    return <ScoreNumber>{player._scorecard}</ScoreNumber>
+    return <ScoreNumber>{player._scorecard} </ScoreNumber>
   }
 
   return (
@@ -49,13 +49,13 @@ height: fit-content;
 margin-right: 10px;
 `
 
-export const Ratings = ({ ratings }) => {
-  if (ratings.length === 0) return;
+export const Ratings = ({ team , gameStarted}) => {
+  if (!gameStarted) return;
   else return (
     <RatingList>
-      {ratings.map((x, i) => {
+      {Array.from(team, ([username, information]) => {
         return (
-          <RatingNumber> {x} </RatingNumber>
+          <RatingNumber> {information._move_rating} </RatingNumber>
         )
       })}
     </RatingList>
@@ -99,7 +99,7 @@ export function CountdownTimer({ totalSeconds, isRunning }) {
 
   return (
     <Digits>
-      <span>{minutes}</span>:<span>{seconds}</span>
+      <span>{minutes}</span>:<span>{seconds < 10 ? `0${seconds}` : seconds}</span>
     </Digits>
   )
 }

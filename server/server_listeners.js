@@ -2,8 +2,9 @@ import { newPlayer, makeid } from "./helpers.js";
 import Timer from "./timer.js";
 import { Player } from "./Player.js";
 
-export const process_move = (io, socket, rooms) => {
+const time_format = [600, 600];
 
+export const process_move_handler = (io, socket, rooms) => {
     socket.on("send_rating", (rating, position, roomCode, isWhite, username) => {
         const this_room = rooms.get(roomCode);
         const team = isWhite ? this_room.white_team : this_room.black_team;
@@ -34,7 +35,6 @@ export const process_move = (io, socket, rooms) => {
             this_room.whiteTurn = !this_room.whiteTurn;
             this_room.moves_submitted = 0;
 
-
             isWhite ? io.to(roomCode).emit("update_white_team", JSON.stringify(Array.from(team)))
                 : io.to(roomCode).emit("update_black_team", JSON.stringify(Array.from(team)));
 
@@ -55,7 +55,9 @@ export const join_room_handler = (io, socket, rooms) => {
         const thisRoom = rooms.get(roomCode);
         const isWhite = newPlayer(thisRoom, username);
         socket.emit("room_joined", roomCode, isWhite);
-        io.to(roomCode).emit("update_players", JSON.stringify(thisRoom.players))
+
+        io.to(roomCode).emit("update_white_team", JSON.stringify(Array.from(thisRoom.white_team)))
+        io.to(roomCode).emit("update_black_team", JSON.stringify(Array.from(thisRoom.black_team)));
     });
 };
 
@@ -73,7 +75,7 @@ export const create_room_handler = (io, socket, rooms) => {
             white_team: new Map(),
             black_team: new Map(),
             whiteTurn: true,
-            timer: new Timer([600, 600]),
+            timer: new Timer(time_format),
             moves_submitted: 0
         });
 
@@ -115,7 +117,7 @@ export const change_team_handler = (io, socket, rooms) => {
     });
 }
 
-export const room_isvalid_handler = (socket, rooms) => {
+export const room_is_valid_handler = (socket, rooms) => {
     socket.on("is_room_valid?", (roomCode) => {
         rooms.has(roomCode) ? socket.emit("yes_room") : socket.emit("no_room");
     });
@@ -124,8 +126,16 @@ export const room_isvalid_handler = (socket, rooms) => {
 export const start_game_handler = (io, socket, rooms) => {
     socket.on("start_game", (roomCode) => {
         const thisRoom = rooms.get(roomCode);
+        thisRoom.timer.setTimer(time_format);
         thisRoom.timer.startTimer(time_out, io, roomCode);
-        io.to(roomCode).emit("begin_game");
+        io.to(roomCode).emit("begin_game", time_format);
+    });
+}
+
+export const stop_game_handler = (socket, rooms) => {
+    socket.on("stop_game", (roomCode) => {
+        const thisRoom = rooms.get(roomCode);
+        thisRoom.timer.stopTimer();
     });
 }
 

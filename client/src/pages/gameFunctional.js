@@ -14,13 +14,10 @@ const Game = () => {
   const [fen, setFen] = useState("start");
   const [turn, setTurn] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
-  const [players, setPlayers] = useState({});
-  const [scorecard, setScorecard] = useState({});
   const [canSubmitMove, setCanSubmitMove] = useState(false);
   const [whiteTurn, setWhiteTurn] = useState(false);
   const [isCheckmate, setIsCheckmate] = useState(false);
   const [timeOut, setTimeOut] = useState(false);
-  const [ratings, setRatings] = useState([]);
   const [whiteTime, setWhiteTime] = useState(600);
   const [blackTime, setBlackTime] = useState(600);
   const [whiteTeam, setWhiteTeam] = useState(new Map());
@@ -70,14 +67,14 @@ const Game = () => {
       setBlackTeam(new Map(JSON.parse(black_team)));
     });
 
-    socket.on("begin_game", () => {
+    socket.on("begin_game", (time_format) => {
       setWhiteTurn(true);
       setGameStarted(true);
       setFen("start");
       setIsCheckmate(false);
       setTimeOut(false);
-      setWhiteTime(600);
-      setBlackTime(600);
+      setWhiteTime(time_format[0]);
+      setBlackTime(time_format[1]);
 
       if (isWhite) {
         setTurn(true);
@@ -95,6 +92,7 @@ const Game = () => {
       setWhiteTime(timer[0]);
       setBlackTime(timer[1]);
     });
+
 
     return () => {
       socket.removeAllListeners();
@@ -215,9 +213,11 @@ const Game = () => {
 
   const Gameover = () => {
     if (isCheckmate) {
+      socket.emit("stop_game", roomCode);
       return (<div>CHECKMATE BUCKO</div>)
     }
     else if (timeOut) {
+      socket.emit("stop_game", roomCode);
       return (<div>{isWhite ? "WHITE" : "BLACK"} WINS ON TIME</div>)
     }
   }
@@ -250,7 +250,7 @@ const Game = () => {
             </TeamSection>
           </div>
 
-          <Ratings ratings={ratings} />
+          <Ratings team={isWhite ? whiteTeam : blackTeam} gameStarted = {gameStarted} />
 
           <GameControls gameStarted={gameStarted} />
 
@@ -260,7 +260,7 @@ const Game = () => {
           </h1>
 
           <div style={{ display: "flex", height: "8%", width: "30%", justifyContent: "center", alignItems: "center" }}>
-            <CountdownTimer totalSeconds={whiteTime} isRunning={whiteTurn} />
+            <CountdownTimer totalSeconds={whiteTime} isRunning={(whiteTurn && gameStarted)} />
             <CountdownTimer totalSeconds={blackTime} isRunning={(!whiteTurn && gameStarted)} />
           </div>
         </GameplaySection>

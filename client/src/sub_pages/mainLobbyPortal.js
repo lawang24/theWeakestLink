@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Button } from "../StyledComponents";
+import { Button } from "../styled_components";
 import { usePlayerContext } from "../contexts/PlayerContext";
 
 export const MainLobbyPortal = ({ isRoomValid, setisHomescreen }) => {

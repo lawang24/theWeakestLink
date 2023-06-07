@@ -1,11 +1,18 @@
 import Chessboard from "chessboardjsx";
-import { useState, useEffect, useRef } from "react";
-import { Logo, SettingButton } from "../StyledComponents"
-import { GameWrapper, RoomCode as RoomCodeButton, ChangeTeam, TeamName, StartGame, GameplaySection } from "../StyledComponents/gameComponents"
-import { TeamSection } from "../StyledComponents/gameComponents";
 import { Chess } from "chess.js";
-import { Teams, Ratings, CountdownTimer } from "../items/displayItems";
+import { useState, useEffect, useRef } from "react";
+import { Logo, SettingButton } from "../styled_components"
+import { GameWrapper, RoomCode as RoomCodeButton, TeamName, GameplaySection, NonChessboard } from "../styled_components/gameComponents"
+import { TeamSection } from "../styled_components/gameComponents";
+import { Teams, Ratings, Gameover } from "../items/display_components.js";
+import { GameControls } from "../items/interactive_components";
+import { CountdownTimer } from "../items/client_clock.js";
 import { usePlayerContext } from '../contexts/PlayerContext';
+import {
+  begin_game_handler, next_turn_handler, room_joined_handler,
+  timer_handler, update_teams_handler
+} from "../handlers/socket_handlers.js";
+import {sendRating} from "../handlers/helpers.js"
 
 const STOCKFISH = window.STOCKFISH;
 const game = new Chess();
@@ -18,8 +25,8 @@ const Game = () => {
   const [whiteTurn, setWhiteTurn] = useState(false);
   const [isCheckmate, setIsCheckmate] = useState(false);
   const [timeOut, setTimeOut] = useState(false);
-  const [whiteTime, setWhiteTime] = useState(600);
-  const [blackTime, setBlackTime] = useState(600);
+  const [whiteTime, setWhiteTime] = useState(50);
+  const [blackTime, setBlackTime] = useState(50);
   const [whiteTeam, setWhiteTeam] = useState(new Map());
   const [blackTeam, setBlackTeam] = useState(new Map());
   const proposedMove = useRef("");
@@ -33,91 +40,31 @@ const Game = () => {
     username,
   } = usePlayerContext();
 
-  ;
+  
 
   useEffect(() => {
 
-    socket.on("room_joined", (roomCode, isWhite) => {
-      setRoomCode(roomCode);
-      setIsWhite(isWhite);
-    });
-  
-    socket.on("next_turn",  (worst_fen, nowWhiteTurn) => {
-      setFen(worst_fen);
-      game.load(worst_fen);
-         
-      // check game conditions
-      if (game.isCheckmate() === true) {
-        setIsCheckmate(true);
-        setGameStarted(false);
-      }
-      // allow the proper players to move 
-      else {
-        setWhiteTurn((whiteTurn) => !whiteTurn);
-        setTurn((turn) => !turn);
-        if (isWhite === nowWhiteTurn) setCanSubmitMove(true);
-      }
+    room_joined_handler(socket, setRoomCode, setIsWhite);
 
-    });
+    next_turn_handler(socket, game, setFen, setIsCheckmate, setGameStarted,
+      setWhiteTurn, setTurn, isWhite, setCanSubmitMove, roomCode);
 
-    socket.on("update_white_team", (white_team) => {
-      setWhiteTeam(new Map(JSON.parse(white_team)));
-    });
+    update_teams_handler(socket, setWhiteTeam, setBlackTeam);
 
-    socket.on("update_black_team", (black_team) => {
-      setBlackTeam(new Map(JSON.parse(black_team)));
-    });
+    begin_game_handler(socket, game, setWhiteTurn, setGameStarted, setFen, setIsCheckmate,
+      setTimeOut, isWhite, setTurn, setCanSubmitMove);
 
-    socket.on("begin_game", (time_format) => {
-      setWhiteTurn(true);
-      setGameStarted(true);
-      setFen("start");
-      setIsCheckmate(false);
-      setTimeOut(false);
-      setWhiteTime(time_format[0]);
-      setBlackTime(time_format[1]);
-
-      if (isWhite) {
-        setTurn(true);
-        setCanSubmitMove(true);
-      }
-      game.reset(); // restart the game
-    });
-
-    socket.on("time_out", () => {
-      setGameStarted(false);
-      setTimeOut(true);
-    });
-
-    socket.on("update_timer", (timer) => {
-      setWhiteTime(timer[0]);
-      setBlackTime(timer[1]);
-    });
-
-    if (isCheckmate || timeOut) {
-      socket.emit("stop_game", roomCode);
-      setTurn(false);
-      setCanSubmitMove(false);
-  }
+    timer_handler(socket, setGameStarted, setTimeOut, setTurn, setCanSubmitMove, roomCode, setWhiteTime, setBlackTime);
 
     return () => {
       socket.removeAllListeners();
     }
 
-  }, [isCheckmate, isWhite, roomCode, setIsWhite, setRoomCode, socket, timeOut]);
+  }, [isCheckmate, isWhite, roomCode, setIsWhite, setRoomCode, socket]);
 
-  // send the client's rating to the server
-  const sendRating = (rating, position) => {
-    socket.emit("send_rating", rating, position, roomCode, isWhite, username);
-  };
+  
 
-  const changeTeam = () => {
-    console.log(roomCode);
-    socket.emit("change_team", isWhite, roomCode, username);
-    setIsWhite((isWhite) => !isWhite);
-  }
-
-  const onDrop =  ({ sourceSquare, targetSquare }) => {
+  const onDrop = ({ sourceSquare, targetSquare }) => {
 
     if (!turn || !canSubmitMove) return;
     const move = game.move({ from: sourceSquare, to: targetSquare })
@@ -158,7 +105,7 @@ const Game = () => {
     const evalMove = () => {
       if (!game.isGameOver()) {
         engine.postMessage("ucinewgame");
-        console.log("proposedMove.current:"+ proposedMove.current)
+        console.log("proposedMove.current:" + proposedMove.current)
         engine.postMessage("position fen " + proposedMove.current);
         engine.postMessage("eval");
       }
@@ -175,7 +122,7 @@ const Game = () => {
       if (line.substr(0, "Total Evaluation".length) === "Total Evaluation") {
         let score = parseFloat(line.substr(18).substr(0, 4));
         if (!isWhite) score = score * -1;
-        sendRating(score, proposedMove.current);
+        sendRating(socket, score, proposedMove.current, roomCode, isWhite, username);
       }
     };
 
@@ -183,7 +130,7 @@ const Game = () => {
       start: function () {
         engine.postMessage("ucinewgame");
         engine.postMessage("isready");
-       // announced_game_over = false;
+        // announced_game_over = false;
       },
       evalMove: function () {
         evalMove();
@@ -191,44 +138,8 @@ const Game = () => {
     };
   };
 
-  // increment_whitetime = (time) => {
-  //   this.setState( {white_time : time } ) 
-  // }
-
-  // increment_blacktime = () => {
-  //   this.setState((state) => ({
-  //     black_time: state.black_time - 1
-  //   }));
-  // };
-
-  const StartGameButton = () => {
-    if (host)
-      return (<StartGame onClick={() => {
-        socket.emit("start_game", roomCode)
-        }}>START</StartGame>);
-  };
-
-  const GameControls = () => {
-    if (!gameStarted) {
-      return (
-        <div style={{ display: "flex", justifyContent: "space-evenly", width: "70%", height: "9%" }}>
-          <StartGameButton />
-          <ChangeTeam team="white" onClick={(e) => changeTeam(true)} >CHANGE TEAM</ChangeTeam>
-        </div>
-      )
-    }
-  }
-
-  const Gameover = () => {
-    if (isCheckmate) {
-        return (<div>CHECKMATE BUCKO</div>);
-    }
-    if (timeOut) {
-        return (<div>{whiteTurn ? "BLACK" : "WHITE"} WINS ON TIME</div>);
-    }
-}
-
   return (
+
     <GameWrapper>
       <Chessboard
         id="board!"
@@ -239,16 +150,15 @@ const Game = () => {
         calcWidth={(screen) => Math.min(screen.screenHeight * .9, screen.screenWidth * .53)}
       />
 
-      <div style={{ display: "flex", "flex-direction": 'column', "justify-content": "space-between", height: "100vh", width: "33vw" }}>
+      <NonChessboard>
 
         <Logo style={{ width: "50%", height: "auto" }}></Logo>
-
 
         <GameplaySection>
           <div style={{ display: "flex", "flex-flow": "row wrap", "justify-content": "center", height: "fit-content", width: "100%", "margin-top": "17%" }}>
             <TeamSection>
               <TeamName color="white">WHITE</TeamName>
-              <Teams team={whiteTeam} isWhite={true}  gameStarted={gameStarted} />
+              <Teams team={whiteTeam} isWhite={true} gameStarted={gameStarted} />
             </TeamSection>
             <TeamSection>
               <TeamName>BLACK</TeamName>
@@ -256,13 +166,14 @@ const Game = () => {
             </TeamSection>
           </div>
 
-          <Ratings team={isWhite ? whiteTeam : blackTeam} gameStarted = {gameStarted} />
+          <Ratings team={isWhite ? whiteTeam : blackTeam} gameStarted={gameStarted} />
 
-          <GameControls gameStarted={gameStarted} />
+          {!gameStarted && <GameControls socket={socket} roomCode={roomCode} host={host} 
+          isWhite={isWhite} username = {username} setIsWhite={setIsWhite} />}
 
           <h1 style={{ color: "#FFFFFF" }}>{turn ? "Your" : "Not Your"} Turn</h1>
           <h1 style={{ color: "#FFFFFF" }}>
-            <Gameover />
+            <Gameover isCheckmate={isCheckmate} timeOut={timeOut} whiteTurn={whiteTurn} />
           </h1>
 
           <div style={{ display: "flex", height: "8%", width: "30%", justifyContent: "center", alignItems: "center" }}>
@@ -276,7 +187,7 @@ const Game = () => {
           <RoomCodeButton>ROOM: {roomCode}</RoomCodeButton>
         </section>
 
-      </div>
+        </NonChessboard>
     </GameWrapper>
   );
 }

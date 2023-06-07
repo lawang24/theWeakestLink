@@ -2,7 +2,7 @@ import { newPlayer, makeid, reset_scorecards } from "./helpers.js";
 import Timer from "./timer.js";
 import { Player } from "./Player.js";
 
-const time_format = [5, 5];
+const time_format = [50, 50];
 
 export const process_move_handler = (io, socket, rooms) => {
     socket.on("send_rating", (rating, position, roomCode, isWhite, username) => {
@@ -82,6 +82,7 @@ export const create_room_handler = (io, socket, rooms) => {
         const this_room = rooms.get(roomCode);
         newPlayer(this_room, username);
         socket.join(roomCode);
+        this_room.timer.setTimer(time_format);
 
         console.log("Room Joined: " + roomCode);
         socket.emit("room_joined", roomCode, isWhite);
@@ -132,21 +133,17 @@ export const start_game_handler = (io, socket, rooms) => {
 
         io.to(roomCode).emit("update_white_team", JSON.stringify(Array.from(this_room.white_team)))
         io.to(roomCode).emit("update_black_team", JSON.stringify(Array.from(this_room.black_team)));
-
-        this_room.timer.setTimer(time_format);
-        io.to(roomCode).emit("update_timer", this_room.timer.getTimer());
+        io.to(roomCode).emit("begin_game");
         this_room.timer.startTimer(time_out, io, roomCode);
-
-        io.to(roomCode).emit("begin_game", time_format);
     }); 
 }
 
-export const stop_game_handler = (socket, rooms) => {
+export const stop_game_handler = (io,socket, rooms) => {
     socket.on("stop_game", (roomCode) => {
         const this_room = rooms.get(roomCode);
-        
         this_room.timer.stopTimer();
-
+        this_room.timer.setTimer(time_format);
+        io.to(roomCode).emit("update_timer", this_room.timer.getTimer());
     });
 }
 

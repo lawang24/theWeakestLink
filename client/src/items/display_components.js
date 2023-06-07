@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { useState, useEffect } from "react";
 import whiteTower from "../images/tower_white.png"
 import blackTower from "../images/tower_black.png"
 
@@ -75,49 +74,12 @@ height: fit-content;
 margin: 0 7px;
 `
 
-export function CountdownTimer({ totalSeconds, isRunning }) {
-
-  const [remainingTime, setRemainingTime] = useState(totalSeconds);
-
-  useEffect(() => {
-    let interval = null;
-
-    if (isRunning && totalSeconds > 0) {
-      let end_time = new Date().getTime() + totalSeconds * 1000;
-
-      interval = setInterval(() => {
-        const timeLeft = Math.floor((end_time - new Date().getTime()) / 1000);
-        setRemainingTime(timeLeft > 0 ? timeLeft : 0);
-      }, 1000);
-    }
-
-    return () => clearInterval(interval);
-
-  }, [isRunning, totalSeconds]);
-
-  const minutes = Math.floor(remainingTime / 60);
-  const seconds = remainingTime % 60;
-
-  return (
-    <Digits>
-      <span>{minutes}</span>:<span>{seconds < 10 ? `0${seconds}` : seconds}</span>
-    </Digits>
-  )
+export const Gameover = ({isCheckmate, timeOut, whiteTurn}) => {
+  if (isCheckmate) {
+    return (<div>CHECKMATE BUCKO</div>);
+  }
+  if (timeOut) {
+    return (<div>{whiteTurn ? "BLACK" : "WHITE"} WINS ON TIME</div>);
+  }
 }
-
-const Digits = styled.div`
-display:flex;
-justify-content:center;
-align-items: center;
-font-family: 'Montserrat';
-font-style: normal;
-font-weight:700;
-font-size:18px;
-text-align:center;
-height:100%;
-width:50%;
-fontSize: 50px;
-background:#FFFFFF
-`
-
 

@@ -1,8 +1,8 @@
 import styled from 'styled-components';
-import { Logo, Wrapper } from "../StyledComponents";
+import { Logo, Wrapper } from "../styled_components";
 import { useState, useEffect } from 'react';
-import { MainLobbyPortal } from "../items/mainLobbyPortal";
-import { UsernamePortal } from "../items/usernamePortal";
+import { MainLobbyPortal } from "../sub_pages/mainLobbyPortal";
+import { UsernamePortal } from "../sub_pages/usernamePortal";
 import { usePlayerContext } from '../contexts/PlayerContext';
 
 function roomListeners(socket, setisHomescreen) {

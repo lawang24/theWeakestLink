@@ -37,7 +37,7 @@ io.on("connection", (socket) => {
 
     start_game_handler(io, socket, rooms);
 
-    stop_game_handler(socket, rooms);
+    stop_game_handler(io,  socket, rooms);
 
     disconnection_handler(io, socket, rooms);
 

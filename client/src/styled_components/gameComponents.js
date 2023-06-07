@@ -61,6 +61,13 @@ width: 30%;
 background:#868BAC;
 `;
 
+export const NonChessboard = styled.div`
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+height: 100vh;
+width: 33vw;
+`;
 
 
 

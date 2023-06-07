@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Arrow, Button } from "../StyledComponents";
+import { Arrow, Button } from "../styled_components";
 import { usePlayerContext } from '../contexts/PlayerContext';
 
 export const UsernamePortal = ({ setisHomescreen }) => {

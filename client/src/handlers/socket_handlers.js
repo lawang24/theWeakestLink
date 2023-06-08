@@ -77,3 +77,16 @@ export const timer_handler = (socket, setGameStarted, setTimeOut, setTurn, setCa
   });
 
 };
+
+export function roomListeners(socket, setisHomescreen) {
+
+  socket.on("yes_room", () => {
+    setisHomescreen(false);
+  });
+
+  socket.on("no_room", () => {
+    alert("Game Not Found");
+    console.log("alert!");
+  });
+
+};

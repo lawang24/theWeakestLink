@@ -12,6 +12,7 @@
     "react-dom": "^18.2.0",
     "react-scripts": "^5.0.1",
     "react-timer-hook": "^3.0.5",
+    "reactjs-popup": "^2.0.5",
     "socket.io-client": "^4.5.4",
     "stockfish": "^15.0.0",
     "stockfish-nnue.wasm": "^1.0.0-1946a675.smolnet",

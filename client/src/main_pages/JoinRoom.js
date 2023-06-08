@@ -4,19 +4,8 @@ import { useState, useEffect } from 'react';
 import { MainLobbyPortal } from "../sub_pages/mainLobbyPortal";
 import { UsernamePortal } from "../sub_pages/usernamePortal";
 import { usePlayerContext } from '../contexts/PlayerContext';
-
-function roomListeners(socket, setisHomescreen) {
-
-  socket.on("yes_room", () => {
-    setisHomescreen(false);
-  });
-
-  socket.on("no_room", () => {
-    alert("Game Not Found");
-    console.log("alert!");
-  });
-
-};
+import { roomListeners } from '../handlers/socket_handlers';
+import { InstructionButton } from '../items/interactive_components';
 
 function JoinRoom() {
   const [isHomescreen, setisHomescreen] = useState(true);
@@ -50,6 +39,7 @@ function JoinRoom() {
         <MainLobbyPortal isRoomValid={isRoomValid} setisHomescreen={setisHomescreen} /> :
         <UsernamePortal setisHomescreen={setisHomescreen} />
       }
+      <InstructionButton/>
     </Wrapper>
   );
 };
@@ -67,12 +57,3 @@ margin-bottom:30px;
 margin-top:-10px;
 `;
 
-
-// const HR = styled.hr`
-// width:35%;
-// height:0;
-// transform: rotate(90deg);
-// border: 2px solid #565656;
-// align-self:center;
-// margin:0 -17%;
-// `;

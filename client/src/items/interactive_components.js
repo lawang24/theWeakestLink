@@ -1,7 +1,7 @@
 import { StartGame, ChangeTeam } from "../styled_components/gameComponents"
 import { changeTeam } from "../handlers/helpers";
 import { useState } from "react";
-import styled from "styled-components";
+import styled, {keyframes, css} from "styled-components";
 import Popup from 'reactjs-popup';
 
 const StartGameButton = ({ socket, roomCode }) => {
@@ -31,27 +31,45 @@ export const InstructionButton = () => {
         <>
             <Button onClick={() => setOpen(o => !o)}> How To Play </Button>
             <StyledPopup open={open} modal onClose={closeModal}>
-                <div className="modal">
+                <Modal>
                     <ExitInstruction className="close" onClick={closeModal}>&times;</ExitInstruction>
                     <p>The rules are simple and similar to chess except for a few rules: </p>
                     <p>1. Split into two teams.</p>
                     <p>2. On your turn, every player on the team will vote for a move.</p>
                     <p>3. The worst move &#40;~Stockfish&#41; is brought forth to represent the team. </p>
-                    
                     <p> Have fun! </p>
-                    
-                </div>
+                </Modal>
             </StyledPopup>
         </>
     )
 }
-
+const openAnimation = keyframes` {
+    0% {
+      transform: scale(1) translateY(0px);
+      opacity: 0;
+      box-shadow: 0 0 0 rgba(241, 241, 241, 0);
+    }
+    1% {
+      transform: scale(0.96) translateY(10px);
+      opacity: 0;
+      box-shadow: 0 0 0 rgba(241, 241, 241, 0);
+    }
+    100% {
+      transform: scale(1) translateY(0px);
+      opacity: 1;
+      box-shadow: 0 0 500px rgba(241, 241, 241, 0);
+    }
+  }
+  ` 
 const StyledPopup = styled(Popup)`
     &-overlay{
         background: rgba(0, 0, 0, 0.5);
     }
     &-content{
-        margin: auto;  
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        margin: 0;
         border-radius: 10px;
         background: #E5E5E5;
         height: 50%;  
@@ -63,6 +81,7 @@ const StyledPopup = styled(Popup)`
         font-weight:700;
         font-size: 18px;
         white-space: pre-line;
+        animation: ${openAnimation} 0.3s cubic-bezier(0.38, 0.1, 0.36, 0.9) forwards;
     }
 `;
 
@@ -86,4 +105,11 @@ const ExitInstruction = styled.a`
     position: absolute;
     top: 0px;
     right: 0px;
+`
+const Modal = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content:center;
+    align-items:center;
+    height:100%
 `

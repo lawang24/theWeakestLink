@@ -28,7 +28,7 @@ io.on("connection", (socket) => {
     process_move_handler(io, socket, rooms);
 
     join_room_handler(io, socket, rooms);
-    
+
     create_room_handler(io, socket, rooms);
 
     room_is_valid_handler(socket, rooms);
@@ -37,7 +37,7 @@ io.on("connection", (socket) => {
 
     start_game_handler(io, socket, rooms);
 
-    stop_game_handler(io,  socket, rooms);
+    stop_game_handler(io, socket, rooms);
 
     disconnection_handler(io, socket, rooms);
 

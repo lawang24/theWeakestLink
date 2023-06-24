@@ -5,6 +5,8 @@ export class Player {
         this._move_rating = 0;
         this._move_fen = "";
         this._scorecard = 0;
+        this._target_square = "";
+        this._source_square = "";
     }
 
     get move_rating() {

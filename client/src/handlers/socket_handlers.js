@@ -1,3 +1,5 @@
+import { squareStyling } from "./helpers";
+
 export const room_joined_handler = (socket, setRoomCode, setIsWhite) => {
   socket.on("room_joined", (roomCode, isWhite) => {
     setRoomCode(roomCode);
@@ -6,20 +8,37 @@ export const room_joined_handler = (socket, setRoomCode, setIsWhite) => {
 };
 
 export const next_turn_handler = (socket, game, setFen, setIsCheckmate, setGameStarted,
-  setWhiteTurn, setTurn, isWhite, setCanSubmitMove, roomCode) => {
-  
-    socket.on("next_turn", (worst_fen, nowWhiteTurn) => {
+  setWhiteTurn, setTurn, isWhite, setCanSubmitMove, roomCode, setHistory, setSquareStyles) => {
+
+  socket.on("next_turn", (worst_fen, nowWhiteTurn, target_square, source_square) => {
     setFen(worst_fen);
     game.load(worst_fen);
 
+    let kingSquare = null;
+
+    console.log(game.inCheck());
+    console.log("checkmate")
+    console.log(game.isCheckmate())
+
+    // check highlighting
+    if (game.inCheck()) {
+      const pieceColor = nowWhiteTurn ? 'w' : 'b';
+      const boardInCheck = game.board()
+      for (let i = 0; i < boardInCheck.length; i++) {
+        kingSquare = boardInCheck[i].find(piece => (piece && piece.type === 'k' && piece.color === pieceColor))
+        if (kingSquare) break;
+      }
+    }
+
+    setSquareStyles(squareStyling(source_square.current, target_square.current, kingSquare));
+
     // check game conditions
-    if (game.isCheckmate() === true) {
+    if (game.isCheckmate()) {
       setIsCheckmate(true);
       setGameStarted(false);
       setTurn(false);
       setCanSubmitMove(false);
       socket.emit("stop_game", roomCode);
-
     }
     // allow the proper players to move 
     else {
@@ -42,7 +61,7 @@ export const update_teams_handler = (socket, setWhiteTeam, setBlackTeam) => {
 };
 
 export const begin_game_handler = (socket, game, setWhiteTurn, setGameStarted, setFen, setIsCheckmate,
-  setTimeOut, isWhite, setTurn, setCanSubmitMove) => {
+  setTimeOut, isWhite, setTurn, setCanSubmitMove, setSquareStyles) => {
 
   socket.on("begin_game", () => {
     setWhiteTurn(true);
@@ -50,12 +69,14 @@ export const begin_game_handler = (socket, game, setWhiteTurn, setGameStarted, s
     setFen("start");
     setIsCheckmate(false);
     setTimeOut(false);
+    setSquareStyles({});
     if (isWhite) {
       setTurn(true);
       setCanSubmitMove(true);
     }
     game.reset(); // restart the game
   });
+
 
 };
 
@@ -73,7 +94,6 @@ export const timer_handler = (socket, setGameStarted, setTimeOut, setTurn, setCa
   socket.on("update_timer", (timer) => {
     setWhiteTime(timer[0]);
     setBlackTime(timer[1]);
-    console.log(timer);
   });
 
 };

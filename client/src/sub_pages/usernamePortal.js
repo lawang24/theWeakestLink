@@ -29,14 +29,14 @@ export const UsernamePortal = ({ setisHomescreen }) => {
     event.preventDefault();
     host ? newRoom(event) : joinRoom(event);
   }
-  
+
   return (
     <UsernamePanel>
       <BackButton onClick={() => {
         setHost(false); setisHomescreen(true)
       }
       }>
-        <Arrow style={{}} />
+        <Arrow />
       </BackButton>
       <UsernameForm onSubmit={handleSubmit}>
         <UsernameCode

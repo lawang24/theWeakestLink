@@ -12,7 +12,7 @@ import {
   begin_game_handler, next_turn_handler, room_joined_handler,
   timer_handler, update_teams_handler
 } from "../handlers/socket_handlers.js";
-import {sendRating} from "../handlers/helpers.js"
+import {sendRating, squareStyling} from "../handlers/helpers.js"
 
 const STOCKFISH = window.STOCKFISH;
 const game = new Chess();
@@ -29,7 +29,12 @@ const Game = () => {
   const [blackTime, setBlackTime] = useState(50);
   const [whiteTeam, setWhiteTeam] = useState(new Map());
   const [blackTeam, setBlackTeam] = useState(new Map());
+  const [history, setHistory] = useState([]);
+  const [squareStyles, setSquareStyles] = useState({});
   const proposedMove = useRef("");
+  const target = useRef("");
+  const source = useRef("");
+
 
   const { socket,
     roomCode,
@@ -41,18 +46,17 @@ const Game = () => {
   } = usePlayerContext();
 
   
-
   useEffect(() => {
 
     room_joined_handler(socket, setRoomCode, setIsWhite);
 
     next_turn_handler(socket, game, setFen, setIsCheckmate, setGameStarted,
-      setWhiteTurn, setTurn, isWhite, setCanSubmitMove, roomCode);
+      setWhiteTurn, setTurn, isWhite, setCanSubmitMove, roomCode, setHistory, setSquareStyles);
 
     update_teams_handler(socket, setWhiteTeam, setBlackTeam);
 
     begin_game_handler(socket, game, setWhiteTurn, setGameStarted, setFen, setIsCheckmate,
-      setTimeOut, isWhite, setTurn, setCanSubmitMove);
+      setTimeOut, isWhite, setTurn, setCanSubmitMove, setSquareStyles);
 
     timer_handler(socket, setGameStarted, setTimeOut, setTurn, setCanSubmitMove, roomCode, setWhiteTime, setBlackTime);
 
@@ -60,7 +64,7 @@ const Game = () => {
       socket.removeAllListeners();
     }
 
-  }, [isCheckmate, isWhite, roomCode, setIsWhite, setRoomCode, socket]);
+  }, [isWhite, roomCode, setIsWhite, setRoomCode, socket]);
 
   
 
@@ -72,10 +76,15 @@ const Game = () => {
     console.log(game.fen());
     // grab player proposed position and show it
     proposedMove.current = game.fen();
+    target.current = targetSquare;
+    source.current = sourceSquare
     setFen(proposedMove.current);
     setCanSubmitMove(false);
 
-    game.undo();
+    // game.undo();
+
+    // highlight the move made
+    setSquareStyles(squareStyling(sourceSquare, targetSquare));
 
     return new Promise((resolve) => {
       resolve();
@@ -91,24 +100,17 @@ const Game = () => {
         ? STOCKFISH()
         : new Worker(options.stockfishjs || "stockfish.js");
 
-    //let announced_game_over;
-
-    // setInterval(() => {
-    //   if (announced_game_over) {
-    //     return;
-    //   }
-    //   if (game.isGameOver()) {
-    //     announced_game_over = true;
-    //   }
-    // }, 500);
-
     const evalMove = () => {
-      if (!game.isGameOver()) {
-        engine.postMessage("ucinewgame");
+      engine.postMessage("ucinewgame");
         console.log("proposedMove.current:" + proposedMove.current)
         engine.postMessage("position fen " + proposedMove.current);
         engine.postMessage("eval");
-      }
+      // if (!game.isGameOver()) {
+      //   engine.postMessage("ucinewgame");
+      //   console.log("proposedMove.current:" + proposedMove.current)
+      //   engine.postMessage("position fen " + proposedMove.current);
+      //   engine.postMessage("eval");
+      // }
     };
 
     engine.onmessage = (event) => {
@@ -119,10 +121,12 @@ const Game = () => {
       } else {
         line = event;
       }
+      console.log("line");
+      console.log(line);
       if (line.substr(0, "Total Evaluation".length) === "Total Evaluation") {
         let score = parseFloat(line.substr(18).substr(0, 4));
         if (!isWhite) score = score * -1;
-        sendRating(socket, score, proposedMove.current, roomCode, isWhite, username);
+        sendRating(socket, score, proposedMove.current, roomCode, isWhite, username, target, source);
       }
     };
 
@@ -148,6 +152,7 @@ const Game = () => {
         boardStyle={boardStyle}
         orientation={isWhite ? "white" : "black"}
         calcWidth={(screen) => Math.min(screen.screenHeight * .9, screen.screenWidth * .53)}
+        squareStyles = {squareStyles}
       />
 
       <NonChessboard>
@@ -188,6 +193,7 @@ const Game = () => {
         </section>
 
         </NonChessboard>
+        
     </GameWrapper>
   );
 }
@@ -201,3 +207,4 @@ const boardStyle = {
   position: "relative",
   left: "5%"
 };
+

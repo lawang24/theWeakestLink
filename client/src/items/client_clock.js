@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 export function CountdownTimer({ totalSeconds, isRunning }) {
 
-    console.log("totalseconds:" + totalSeconds);
+    // console.log("totalseconds:" + totalSeconds);
     const [remainingTime, setRemainingTime] = useState(totalSeconds);
   
     useEffect(() => {

@@ -5,7 +5,7 @@ import { Player } from "./Player.js";
 const time_format = [50, 50];
 
 export const process_move_handler = (io, socket, rooms) => {
-    socket.on("send_rating", (rating, position, roomCode, isWhite, username) => {
+    socket.on("send_rating", (rating, position, roomCode, isWhite, username, target, source) => {
         const this_room = rooms.get(roomCode);
         const team = isWhite ? this_room.white_team : this_room.black_team;
         const player = team.get(username);
@@ -15,30 +15,38 @@ export const process_move_handler = (io, socket, rooms) => {
 
         this_room.moves_submitted++;
 
+        // update highlighting
+        player._source_square = source;
+        player._target_square = target;
+
         // triggers once everyone's votes are in
         if (team.size != 0 && team.size === this_room.moves_submitted) {
 
             let lowest_rating = Infinity;
-            let worst_fen = "";
-            let weakest_player = "";
+            let weakest_player_username = "";
 
             team.forEach((player, username) => {
                 if (player._move_rating < lowest_rating) {
                     lowest_rating = player._move_rating;
-                    worst_fen = player._move_fen;
-                    weakest_player = username;
+                    weakest_player_username = username;
                 }
             });
 
             // update room state
-            team.get(weakest_player)._scorecard++;
+            const weakest_player = team.get(weakest_player_username);
+            const worst_fen = weakest_player._move_fen;
+            const target_square = weakest_player._target_square;
+            const source_square = weakest_player._source_square;
+            weakest_player._scorecard++;
+
             this_room.whiteTurn = !this_room.whiteTurn;
             this_room.moves_submitted = 0;
 
             isWhite ? io.to(roomCode).emit("update_white_team", JSON.stringify(Array.from(team)))
                 : io.to(roomCode).emit("update_black_team", JSON.stringify(Array.from(team)));
-
-            io.to(roomCode).emit("next_turn", worst_fen, this_room.whiteTurn);
+            
+            console.log( target_square, source_square)
+            io.to(roomCode).emit("next_turn", worst_fen, this_room.whiteTurn, target_square, source_square);
 
             // update timer
             this_room.timer.stopTimer();

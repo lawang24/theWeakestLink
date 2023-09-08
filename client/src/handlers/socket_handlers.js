@@ -80,6 +80,8 @@ export const begin_game_handler = (socket, game, setWhiteTurn, setGameStarted, s
 
 };
 
+/* handles socket event listeners for timer functionality in between turns and at the end of the game, resetting the game
+to the initial state in the latter case*/
 export const timer_handler = (socket, setGameStarted, setTimeOut, setTurn, setCanSubmitMove,
   roomCode, setWhiteTime, setBlackTime) => {
 
@@ -98,6 +100,8 @@ export const timer_handler = (socket, setGameStarted, setTimeOut, setTurn, setCa
 
 };
 
+
+// socketHandlers for receiving confirmation of the queried room's existence 
 export function roomListeners(socket, setisHomescreen) {
 
   socket.on("yes_room", () => {

@@ -1,7 +1,8 @@
 import Chessboard from "chessboardjsx";
 import { Chess } from "chess.js";
 import { useState, useEffect, useRef } from "react";
-import { Logo, SettingButton } from "../styled_components"
+import { SettingButton } from "../styled_components/settingButton";
+import { Logo } from "../styled_components"
 import { GameWrapper, RoomCode as RoomCodeButton, TeamName, GameplaySection, NonChessboard } from "../styled_components/gameComponents"
 import { TeamSection } from "../styled_components/gameComponents";
 import { Teams, Ratings, Gameover } from "../items/display_components.js";
@@ -188,7 +189,7 @@ const Game = () => {
         </GameplaySection>
 
         <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justify-content': 'start' }}>
-          <SettingButton style={{ height: "48px", width: "48px", }}></SettingButton>
+          <SettingButton whiteTime = {whiteTime} setWhiteTime = {setWhiteTime} setBlackTime = {setBlackTime}/>
           <RoomCodeButton>ROOM: {roomCode}</RoomCodeButton>
         </section>
 

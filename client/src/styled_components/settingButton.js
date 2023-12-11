@@ -2,7 +2,7 @@ import styled, { keyframes } from "styled-components";
 import { useState } from "react";
 import Popup from 'reactjs-popup';
 import gear from '../images/settingGear.png';
-
+import { usePlayerContext } from '../contexts/PlayerContext';
 
 const SettingButtonImage = (props) => <img style={props.style} src={gear} alt="settings" />
 
@@ -85,8 +85,11 @@ const Modal = styled.div`
 const TimeFormat = ({setWhiteTime, setBlackTime, whiteTime}) =>{
     const [timeFormat, setTimeFormat] = useState(whiteTime);
 
+    const {socket,roomCode} = usePlayerContext();
+
     const handleSubmit = (event) => {
         event.preventDefault();
+        socket.emit("set_time_format", roomCode, timeFormat);
         setWhiteTime(timeFormat)
         setBlackTime(timeFormat)
     }

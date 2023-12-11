@@ -122,7 +122,6 @@ const Game = () => {
       } else {
         line = event;
       }
-      console.log("line");
       console.log(line);
       if (line.substr(0, "Total Evaluation".length) === "Total Evaluation") {
         let score = parseFloat(line.substr(18).substr(0, 4));
@@ -160,7 +159,7 @@ const Game = () => {
 
         <Logo style={{ width: "50%", height: "auto" }}></Logo>
 
-        <GameplaySection>
+        <   >
           <div style={{ display: "flex", "flex-flow": "row wrap", "justify-content": "center", height: "fit-content", width: "100%", "margin-top": "17%" }}>
             <TeamSection>
               <TeamName color="white">WHITE</TeamName>
@@ -172,6 +171,7 @@ const Game = () => {
             </TeamSection>
           </div>
 
+        
           <Ratings team={isWhite ? whiteTeam : blackTeam} gameStarted={gameStarted} />
 
           {!gameStarted && <GameControls socket={socket} roomCode={roomCode} host={host} 
@@ -186,10 +186,10 @@ const Game = () => {
             <CountdownTimer totalSeconds={whiteTime} isRunning={(whiteTurn && gameStarted)} />
             <CountdownTimer totalSeconds={blackTime} isRunning={(!whiteTurn && gameStarted)} />
           </div>
-        </GameplaySection>
+        </>
 
         <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justify-content': 'start' }}>
-          <SettingButton whiteTime = {whiteTime} setWhiteTime = {setWhiteTime} setBlackTime = {setBlackTime}/>
+          <SettingButton setWhiteTime = {setWhiteTime} setBlackTime = {setBlackTime} socket = {socket}/>
           <RoomCodeButton>ROOM: {roomCode}</RoomCodeButton>
         </section>
 

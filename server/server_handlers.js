@@ -183,3 +183,14 @@ const time_out = (io, roomCode) => {
     io.to(roomCode).emit("time_out");
 }
 
+// sets the room time format to new format sent by host
+// updates the rest of the room
+export function set_time_format_handler(io,socket,rooms){
+    socket.on("set_time_format",(roomCode,timeFormat)=>{
+        const this_room = rooms.get(roomCode);
+        this_room.timer.setTimer([timeFormat,timeFormat])
+
+        io.to(roomCode).emit("update_timer", this_room.timer.getTimer());
+        
+    })
+  }

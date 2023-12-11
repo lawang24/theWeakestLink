@@ -16,10 +16,6 @@ export const next_turn_handler = (socket, game, setFen, setIsCheckmate, setGameS
 
     let kingSquare = null;
 
-    console.log(game.inCheck());
-    console.log("checkmate")
-    console.log(game.isCheckmate())
-
     // check highlighting
     if (game.inCheck()) {
       const pieceColor = nowWhiteTurn ? 'w' : 'b';
@@ -114,3 +110,5 @@ export function roomListeners(socket, setisHomescreen) {
   });
 
 };
+
+

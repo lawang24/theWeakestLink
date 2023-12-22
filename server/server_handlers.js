@@ -45,12 +45,13 @@ export const process_move_handler = (io, socket, rooms) => {
             isWhite ? io.to(roomCode).emit("update_white_team", JSON.stringify(Array.from(team)))
                 : io.to(roomCode).emit("update_black_team", JSON.stringify(Array.from(team)));
             
-            console.log( target_square, source_square)
+            // console.log( target_square, source_square)
             io.to(roomCode).emit("next_turn", worst_fen, this_room.whiteTurn, target_square, source_square);
 
             // update timer
             this_room.timer.stopTimer();
             io.to(roomCode).emit("update_timer", this_room.timer.getTimer());
+            console.log("Changed Time:" + this_room.timer.getTimer())
             this_room.timer.nextTurn(this_room.whiteTurn, time_out, io, roomCode);
 
         }
@@ -133,8 +134,9 @@ export const room_is_valid_handler = (socket, rooms) => {
 };
 
 export const start_game_handler = (io, socket, rooms) => {
-    console.log("server start game");
+    
     socket.on("start_game", (roomCode) => {
+        console.log("server start game");
         const this_room = rooms.get(roomCode);
 
         reset_scorecards(this_room);

@@ -90,6 +90,7 @@ export const timer_handler = (socket, setGameStarted, setTimeOut, setTurn, setCa
   });
 
   socket.on("update_timer", (timer) => {
+    console.log("update_time:" + timer.toString())
     setWhiteTime(timer[0]);
     setBlackTime(timer[1]);
   });

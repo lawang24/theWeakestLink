@@ -1,11 +1,13 @@
 import { newPlayer, makeid, reset_scorecards } from "./helpers.js";
 import Timer from "./timer.js";
 import { Player } from "./Player.js";
+import { findWeakestPlayer } from "./helpers.js";
 
 const time_format = [50, 50];
 
 export const process_move_handler = (io, socket, rooms) => {
     socket.on("send_rating", (rating, position, roomCode, isWhite, username, target, source) => {
+
         const this_room = rooms.get(roomCode);
         const team = isWhite ? this_room.white_team : this_room.black_team;
         const player = team.get(username);
@@ -22,18 +24,9 @@ export const process_move_handler = (io, socket, rooms) => {
         // triggers once everyone's votes are in
         if (team.size != 0 && team.size === this_room.moves_submitted) {
 
-            let lowest_rating = Infinity;
-            let weakest_player_username = "";
-
-            team.forEach((player, username) => {
-                if (player._move_rating < lowest_rating) {
-                    lowest_rating = player._move_rating;
-                    weakest_player_username = username;
-                }
-            });
-
             // update room state
-            const weakest_player = team.get(weakest_player_username);
+            const weakestPlayerInfo = findWeakestPlayer(team);
+            const weakest_player = team.get(weakestPlayerInfo.username);
             const worst_fen = weakest_player._move_fen;
             const target_square = weakest_player._target_square;
             const source_square = weakest_player._source_square;
@@ -44,7 +37,7 @@ export const process_move_handler = (io, socket, rooms) => {
 
             isWhite ? io.to(roomCode).emit("update_white_team", JSON.stringify(Array.from(team)))
                 : io.to(roomCode).emit("update_black_team", JSON.stringify(Array.from(team)));
-            
+
             // console.log( target_square, source_square)
             io.to(roomCode).emit("next_turn", worst_fen, this_room.whiteTurn, target_square, source_square);
 
@@ -134,7 +127,7 @@ export const room_is_valid_handler = (socket, rooms) => {
 };
 
 export const start_game_handler = (io, socket, rooms) => {
-    
+
     socket.on("start_game", (roomCode) => {
         console.log("server start game");
         const this_room = rooms.get(roomCode);
@@ -145,10 +138,10 @@ export const start_game_handler = (io, socket, rooms) => {
         io.to(roomCode).emit("update_black_team", JSON.stringify(Array.from(this_room.black_team)));
         io.to(roomCode).emit("begin_game");
         this_room.timer.startTimer(time_out, io, roomCode);
-    }); 
+    });
 }
 
-export const stop_game_handler = (io,socket, rooms) => {
+export const stop_game_handler = (io, socket, rooms) => {
     socket.on("stop_game", (roomCode) => {
         const this_room = rooms.get(roomCode);
         this_room.timer.stopTimer();
@@ -187,12 +180,12 @@ const time_out = (io, roomCode) => {
 
 // sets the room time format to new format sent by host
 // updates the rest of the room
-export function set_time_format_handler(io,socket,rooms){
-    socket.on("set_time_format",(roomCode,timeFormat)=>{
+export function set_time_format_handler(io, socket, rooms) {
+    socket.on("set_time_format", (roomCode, timeFormat) => {
         const this_room = rooms.get(roomCode);
-        this_room.timer.setTimer([timeFormat,timeFormat])
+        this_room.timer.setTimer([timeFormat, timeFormat])
 
         io.to(roomCode).emit("update_timer", this_room.timer.getTimer());
-        
+
     })
-  }
+}

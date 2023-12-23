@@ -2,7 +2,7 @@
 export class Player {
 
     constructor() {
-        this._move_rating = 0;
+        this._move_rating = "";
         this._move_fen = "";
         this._scorecard = 0;
         this._target_square = "";

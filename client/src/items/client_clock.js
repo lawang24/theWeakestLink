@@ -3,21 +3,18 @@ import styled from "styled-components";
 
 export function CountdownTimer({ totalSeconds, isRunning }) {
 
-    // console.log("totalseconds:" + totalSeconds);
     const [remainingTime, setRemainingTime] = useState(totalSeconds);
   
     useEffect(() => {
       let interval = null;
   
       setRemainingTime(totalSeconds);
-      console.log(totalSeconds)
   
       if (isRunning) {
         let end_time = new Date().getTime() + totalSeconds * 1000;
   
         interval = setInterval(() => {
           const timeLeft = Math.ceil((end_time - new Date().getTime()) / 1000);
-          console.log(timeLeft)
           setRemainingTime(timeLeft > 0 ? timeLeft : 0);
         }, 1000);
       }

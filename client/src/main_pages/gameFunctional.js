@@ -13,9 +13,11 @@ import {
   begin_game_handler, next_turn_handler, room_joined_handler,
   timer_handler, update_teams_handler
 } from "../handlers/socket_handlers.js";
-import {sendRating, squareStyling} from "../handlers/helpers.js"
+import { sendRating, squareStyling } from "../handlers/helpers.js"
 
-const STOCKFISH = window.STOCKFISH;
+console.log("Game functional loaded")
+
+const engine = new Worker("stockfish.js");
 const game = new Chess();
 
 const Game = () => {
@@ -46,9 +48,8 @@ const Game = () => {
     username,
   } = usePlayerContext();
 
-  
+  // core logic handler mounts
   useEffect(() => {
-
     room_joined_handler(socket, setRoomCode, setIsWhite);
 
     next_turn_handler(socket, game, setFen, setIsCheckmate, setGameStarted,
@@ -68,6 +69,55 @@ const Game = () => {
   }, [isWhite, roomCode, setIsWhite, setRoomCode, socket]);
 
   
+
+  const engineGame = () => {
+  
+    const evalMove = () => {
+      engine.postMessage("ucinewgame");
+      console.log("proposedMove.current:" + proposedMove.current)
+      engine.postMessage("position fen " + proposedMove.current);
+      engine.postMessage("go depth 5")
+
+      // engine.postMessage("eval");
+      // if (!game.isGameOver()) {
+      //   engine.postMessage("ucinewgame");
+      //   console.log("proposedMove.current:" + proposedMove.current)
+      //   engine.postMessage("position fen " + proposedMove.current);
+      //   engine.postMessage("eval");
+      // }
+    };
+  
+    engine.onmessage = (event) => {
+      let line;
+      console.log("trigger")
+  
+      if (event && typeof event === "object") {
+        line = event.data;
+      } else {
+        line = event;
+      }
+      console.log(line);
+      if (line.substring(0, 8) === "bestmove") {
+
+        let score = line.substring(line.indexOf("score")+6);
+        console.log(score)
+        // if (!isWhite) score = score * -1;
+        sendRating(socket, score, proposedMove.current, roomCode, isWhite, username, target, source);
+      }
+    };
+  
+    return {
+      start: function () {
+        console.log("starting")
+        engine.postMessage("ucinewgame");
+        engine.postMessage("isready");
+        // announced_game_over = false;
+      },
+      evalMove: function () {
+        evalMove();
+      },
+    };
+  };
 
   const onDrop = ({ sourceSquare, targetSquare }) => {
 
@@ -92,56 +142,6 @@ const Game = () => {
     }).then(() => engineGame().evalMove());
   };
 
-  const engineGame = (options) => {
-    options = options || {};
-
-    /// We can load Stockfish via Web Workers or via STOCKFISH() if loaded from a <script> tag.
-    let engine =
-      typeof STOCKFISH === "function"
-        ? STOCKFISH()
-        : new Worker(options.stockfishjs || "stockfish.js");
-
-    const evalMove = () => {
-      engine.postMessage("ucinewgame");
-        console.log("proposedMove.current:" + proposedMove.current)
-        engine.postMessage("position fen " + proposedMove.current);
-        engine.postMessage("eval");
-      // if (!game.isGameOver()) {
-      //   engine.postMessage("ucinewgame");
-      //   console.log("proposedMove.current:" + proposedMove.current)
-      //   engine.postMessage("position fen " + proposedMove.current);
-      //   engine.postMessage("eval");
-      // }
-    };
-
-    engine.onmessage = (event) => {
-      let line;
-
-      if (event && typeof event === "object") {
-        line = event.data;
-      } else {
-        line = event;
-      }
-      console.log(line);
-      if (line.substr(0, "Total Evaluation".length) === "Total Evaluation") {
-        let score = parseFloat(line.substr(18).substr(0, 4));
-        if (!isWhite) score = score * -1;
-        sendRating(socket, score, proposedMove.current, roomCode, isWhite, username, target, source);
-      }
-    };
-
-    return {
-      start: function () {
-        engine.postMessage("ucinewgame");
-        engine.postMessage("isready");
-        // announced_game_over = false;
-      },
-      evalMove: function () {
-        evalMove();
-      },
-    };
-  };
-
   return (
 
     <GameWrapper>
@@ -152,7 +152,7 @@ const Game = () => {
         boardStyle={boardStyle}
         orientation={isWhite ? "white" : "black"}
         calcWidth={(screen) => Math.min(screen.screenHeight * .9, screen.screenWidth * .53)}
-        squareStyles = {squareStyles}
+        squareStyles={squareStyles}
       />
 
       <NonChessboard>
@@ -171,11 +171,11 @@ const Game = () => {
             </TeamSection>
           </div>
 
-        
+
           <Ratings team={isWhite ? whiteTeam : blackTeam} gameStarted={gameStarted} />
 
-          {!gameStarted && <GameControls socket={socket} roomCode={roomCode} host={host} 
-          isWhite={isWhite} username = {username} setIsWhite={setIsWhite} />}
+          {!gameStarted && <GameControls socket={socket} roomCode={roomCode} host={host}
+            isWhite={isWhite} username={username} setIsWhite={setIsWhite} />}
 
           <h1 style={{ color: "#FFFFFF" }}>{turn ? "Your" : "Not Your"} Turn</h1>
           <h1 style={{ color: "#FFFFFF" }}>
@@ -189,12 +189,12 @@ const Game = () => {
         </>
 
         <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justify-content': 'start' }}>
-          <SettingButton setWhiteTime = {setWhiteTime} setBlackTime = {setBlackTime} socket = {socket}/>
+          <SettingButton setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} socket={socket} />
           <RoomCodeButton>ROOM: {roomCode}</RoomCodeButton>
         </section>
 
-        </NonChessboard>
-        
+      </NonChessboard>
+
     </GameWrapper>
   );
 }

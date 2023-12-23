@@ -15,8 +15,32 @@ export function newPlayer(thisRoom, username) {
     return isWhite;
 }
 
-export function the_weakest_player(team) {
+export function findWeakestPlayer(team) {
+    
+    let weakestPlayerInfo = {
+        username: "",
+        moveType: "",
+        score: null
+    };
 
+    team.forEach((player, username) => {
+        let [moveType, score] = player.move_rating.split(' ');
+        score = parseInt(score);
+
+
+        // mate in 0 is overriden and gg
+        const isFirstPlayer = weakestPlayerInfo.score === null;
+        const isCurrentMoveTypeM = moveType === 'm';
+        const isWeakestMoveTypeC = weakestPlayerInfo.moveType === 'c';
+        const isNewWeakestForM = isCurrentMoveTypeM && (isWeakestMoveTypeC || score < weakestPlayerInfo.score);
+        const isNewWeakestForC = !isCurrentMoveTypeM && (isWeakestMoveTypeC && score > weakestPlayerInfo.score);
+
+        if (isFirstPlayer || isNewWeakestForM || isNewWeakestForC) {
+            weakestPlayerInfo = { username, moveType, score };
+        }
+    });
+
+    return weakestPlayerInfo;
 
 };
 

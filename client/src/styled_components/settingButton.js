@@ -83,36 +83,49 @@ const Modal = styled.div`
 
 
 const TimeFormat = ({setWhiteTime, setBlackTime, whiteTime}) =>{
-    const [timeFormat, setTimeFormat] = useState(whiteTime);
+    const [timeFormat, setTimeFormat] = useState(0);
 
     const {socket,roomCode} = usePlayerContext();
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        socket.emit("set_time_format", roomCode, timeFormat);
+        socket.emit("set_time_format", roomCode, timeFormat*60);
         setWhiteTime(timeFormat)
         setBlackTime(timeFormat)
     }
 
     return(
         <form onSubmit={handleSubmit}>
-        <TimeFormatInput value = {whiteTime} onChange={e => setTimeFormat(e.target.value)} />
-        <button type = "submit">Change Time Format</button>
+        <TimeFormatWrapper>
+            <h2>Time Format (Minutes)</h2>
+            <TimeFormatInput value = {whiteTime} onChange={e => setTimeFormat(e.target.value)} />
+        </TimeFormatWrapper>
+        <SettingsSubmitButton type = "submit">Change Time Format</SettingsSubmitButton>
         </form>
     )
 
 }
 
+const TimeFormatWrapper = styled.div`
+    display:flex;
+    gap: 15px;
+    align-items: center;
+`
+
+const SettingsSubmitButton = styled.button`
+    font-size: 1rem;
+    padding: 10px 15px;
+    cursor: pointer;
+`
+
 const TimeFormatInput = styled.input`
 background:#E5E5E5;
-height:26%;
-width:100%;
-padding: 0;
-margin-bottom:10%;
-border-width: 0;
+width:100px;
+padding: 5px 0;
+border-width: 1px;
+border-radius 5px;
 font-family: 'Montserrat';
-font-style: normal;
+font-size: 1.5rem;
 font-weight:700;
-font-size:18px;
 text-align:center;
 `;

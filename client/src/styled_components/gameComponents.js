@@ -4,6 +4,8 @@ import { Wrapper, Button } from "./index.js";
 export const GameWrapper = styled(Wrapper)`
 flex-flow:row-reverse;
 justify-content:space-evenly;
+max-width: 1800px;
+width: 100vw;
 `;
 
 export const GameplaySection = styled.section`
@@ -17,7 +19,6 @@ height: 70vh;
 export const RoomCode = styled(Button)`
 width:34%;
 height:56px;
-margin-left:10%;
 background:#868BAC;
 pointer-events:none;
 `;
@@ -64,6 +65,7 @@ background:#868BAC;
 export const NonChessboard = styled.div`
 display: flex;
 flex-direction: column;
+align-items: center;
 justify-content: space-between;
 height: 100vh;
 width: 33vw;

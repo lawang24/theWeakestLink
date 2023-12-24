@@ -7,7 +7,7 @@ import { GameWrapper, RoomCode as RoomCodeButton, TeamName, GameplaySection, Non
 import { TeamSection } from "../styled_components/gameComponents";
 import { Teams, Ratings, Gameover } from "../items/display_components.js";
 import { GameControls } from "../items/interactive_components";
-import { CountdownTimer } from "../items/client_clock.js";
+import { MatchClock } from "../items/matchClock.js";
 import { usePlayerContext } from '../contexts/PlayerContext';
 import {
   begin_game_handler, next_turn_handler, room_joined_handler,
@@ -68,10 +68,10 @@ const Game = () => {
 
   }, [isWhite, roomCode, setIsWhite, setRoomCode, socket]);
 
-  
+
 
   const engineGame = () => {
-  
+
     const evalMove = () => {
       engine.postMessage("ucinewgame");
       console.log("proposedMove.current:" + proposedMove.current)
@@ -86,11 +86,11 @@ const Game = () => {
       //   engine.postMessage("eval");
       // }
     };
-  
+
     engine.onmessage = (event) => {
       let line;
       console.log("trigger")
-  
+
       if (event && typeof event === "object") {
         line = event.data;
       } else {
@@ -99,13 +99,13 @@ const Game = () => {
       console.log(line);
       if (line.substring(0, 8) === "bestmove") {
 
-        let score = line.substring(line.indexOf("score")+6);
+        let score = line.substring(line.indexOf("score") + 6);
         console.log(score)
         // if (!isWhite) score = score * -1;
         sendRating(socket, score, proposedMove.current, roomCode, isWhite, username, target, source);
       }
     };
-  
+
     return {
       start: function () {
         console.log("starting")
@@ -159,43 +159,41 @@ const Game = () => {
 
         <Logo style={{ width: "50%", height: "auto" }}></Logo>
 
-        <   >
-          <div style={{ display: "flex", "flex-flow": "row wrap", "justify-content": "center", height: "fit-content", width: "100%", "margin-top": "17%" }}>
-            <TeamSection>
-              <TeamName color="white">WHITE</TeamName>
-              <Teams team={whiteTeam} isWhite={true} gameStarted={gameStarted} />
-            </TeamSection>
-            <TeamSection>
-              <TeamName>BLACK</TeamName>
-              <Teams team={blackTeam} isWhite={false} gameStarted={gameStarted} />
-            </TeamSection>
-          </div>
+        <div style={{ display: "flex", "flexFlow": "row wrap", "justifyContent": "center", height: "fit-content", width: "100%", "marginTop": "17%" }}>
+          <TeamSection>
+            <TeamName color="white">WHITE</TeamName>
+            <Teams team={whiteTeam} isWhite={true} gameStarted={gameStarted} />
+          </TeamSection>
+          <TeamSection>
+            <TeamName>BLACK</TeamName>
+            <Teams team={blackTeam} isWhite={false} gameStarted={gameStarted} />
+          </TeamSection>
+        </div>
 
 
-          <Ratings team={isWhite ? whiteTeam : blackTeam} gameStarted={gameStarted} />
+        <Ratings team={isWhite ? whiteTeam : blackTeam} gameStarted={gameStarted} />
 
-          {!gameStarted && <GameControls socket={socket} roomCode={roomCode} host={host}
-            isWhite={isWhite} username={username} setIsWhite={setIsWhite} />}
+        {!gameStarted && <GameControls socket={socket} roomCode={roomCode} host={host}
+          isWhite={isWhite} username={username} setIsWhite={setIsWhite} />}
 
-          <h1 style={{ color: "#FFFFFF" }}>{turn ? "Your" : "Not Your"} Turn</h1>
-          <h1 style={{ color: "#FFFFFF" }}>
-            <Gameover isCheckmate={isCheckmate} timeOut={timeOut} whiteTurn={whiteTurn} />
-          </h1>
+        <h1 style={{ color: "#FFFFFF", fontFamily: "Montserrat", fontSize: "1.5rem" }}>{turn ? "Your" : "Not Your"} Turn</h1>
+        <h1 style={{ color: "#FFFFFF" }}>
+          <Gameover isCheckmate={isCheckmate} timeOut={timeOut} whiteTurn={whiteTurn} />
+        </h1>
 
-          <div style={{ display: "flex", height: "8%", width: "30%", justifyContent: "center", alignItems: "center" }}>
-            <CountdownTimer totalSeconds={whiteTime} isRunning={(whiteTurn && gameStarted)} />
-            <CountdownTimer totalSeconds={blackTime} isRunning={(!whiteTurn && gameStarted)} />
-          </div>
-        </>
 
-        <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justify-content': 'start' }}>
+
+        <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justifyContent': 'start', 'gap': '5%' }}>
           <SettingButton setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} socket={socket} />
           <RoomCodeButton>ROOM: {roomCode}</RoomCodeButton>
+          <MatchClock whiteTime={whiteTime} blackTime={blackTime} whiteTurn={whiteTurn} gameStarted={gameStarted} />
         </section>
 
       </NonChessboard>
 
     </GameWrapper>
+
+
   );
 }
 

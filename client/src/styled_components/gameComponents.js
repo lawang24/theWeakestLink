@@ -1,11 +1,20 @@
 import styled from 'styled-components';
-import { Wrapper, Button } from "./index.js";
+import { Button } from "./index.js";
 
-export const GameWrapper = styled(Wrapper)`
+export const GameWrapper = styled.div`
+display:flex;
+flex-direction: column;
+align-items:center;
+margin:0;
+padding:0;
+background-color: rgb(38,40,56,0.93);
+height:100vh;
 flex-flow:row-reverse;
 justify-content:space-evenly;
 max-width: 1800px;
 width: 100vw;
+
+
 `;
 
 export const GameplaySection = styled.section`

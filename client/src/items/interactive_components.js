@@ -1,7 +1,7 @@
 import { StartGame, ChangeTeam } from "../styled_components/gameComponents"
 import { changeTeam } from "../handlers/helpers";
 import { useState } from "react";
-import styled, {keyframes, css} from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 import Popup from 'reactjs-popup';
 
 const StartGameButton = ({ socket, roomCode }) => {
@@ -13,9 +13,8 @@ const StartGameButton = ({ socket, roomCode }) => {
 };
 
 
-export const GameControls = ({ socket, roomCode, host, isWhite, username, setIsWhite }) => {
-
-    return (
+export const GameControls = ({ gameStarted,socket, roomCode, host, isWhite, username, setIsWhite }) => {
+    if (!gameStarted) return (
         <div style={{ display: "flex", justifyContent: "space-evenly", width: "70%", height: "9%" }}>
             {host && <StartGameButton socket={socket} roomCode={roomCode} />}
             <ChangeTeam team="white" onClick={(e) => changeTeam(socket, isWhite, roomCode, username, setIsWhite)} >CHANGE TEAM</ChangeTeam>
@@ -60,7 +59,7 @@ const openAnimation = keyframes` {
       box-shadow: 0 0 500px rgba(241, 241, 241, 0);
     }
   }
-  ` 
+  `
 const StyledPopup = styled(Popup)`
     &-overlay{
         background: rgba(0, 0, 0, 0.5);

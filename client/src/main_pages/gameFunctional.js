@@ -3,9 +3,8 @@ import { Chess } from "chess.js";
 import { useState, useEffect, useRef } from "react";
 import { SettingButton } from "../styled_components/settingButton";
 import { Logo } from "../styled_components"
-import { GameWrapper, RoomCode as RoomCodeButton, TeamName, GameplaySection, NonChessboard } from "../styled_components/gameComponents"
-import { TeamSection } from "../styled_components/gameComponents";
-import { Teams, Ratings, Gameover } from "../items/display_components.js";
+import { GameWrapper, RoomCode as RoomCodeButton, NonChessboard } from "../styled_components/gameComponents"
+import { Ratings, Gameover } from "../items/display_components.js";
 import { GameControls } from "../items/interactive_components";
 import { MatchClock } from "../items/matchClock.js";
 import { usePlayerContext } from '../contexts/PlayerContext';
@@ -14,6 +13,7 @@ import {
   timer_handler, update_teams_handler
 } from "../handlers/socket_handlers.js";
 import { sendRating, squareStyling } from "../handlers/helpers.js"
+import TeamRoster from "../items/teamRoster.js";
 
 console.log("Game functional loaded")
 
@@ -158,30 +158,16 @@ const Game = () => {
       <NonChessboard>
 
         <Logo style={{ width: "50%", height: "auto" }}></Logo>
-
-        <div style={{ display: "flex", "flexFlow": "row wrap", "justifyContent": "center", height: "fit-content", width: "100%", "marginTop": "17%" }}>
-          <TeamSection>
-            <TeamName color="white">WHITE</TeamName>
-            <Teams team={whiteTeam} isWhite={true} gameStarted={gameStarted} />
-          </TeamSection>
-          <TeamSection>
-            <TeamName>BLACK</TeamName>
-            <Teams team={blackTeam} isWhite={false} gameStarted={gameStarted} />
-          </TeamSection>
-        </div>
-
-
+        <TeamRoster  whiteTeam = {whiteTeam} blackTeam = {blackTeam} gameStarted = {gameStarted} />
         <Ratings team={isWhite ? whiteTeam : blackTeam} gameStarted={gameStarted} />
 
-        {!gameStarted && <GameControls socket={socket} roomCode={roomCode} host={host}
-          isWhite={isWhite} username={username} setIsWhite={setIsWhite} />}
-
+        {/*display of these depend on the state of the game*/}
+        <GameControls gameStarted={gameStarted} socket={socket} roomCode={roomCode} host={host}
+          isWhite={isWhite} username={username} setIsWhite={setIsWhite} />
         <h1 style={{ color: "#FFFFFF", fontFamily: "Montserrat", fontSize: "1.5rem" }}>{turn ? "Your" : "Not Your"} Turn</h1>
         <h1 style={{ color: "#FFFFFF" }}>
           <Gameover isCheckmate={isCheckmate} timeOut={timeOut} whiteTurn={whiteTurn} />
         </h1>
-
-
 
         <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justifyContent': 'start', 'gap': '5%' }}>
           <SettingButton setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} socket={socket} />

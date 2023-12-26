@@ -13,7 +13,7 @@ export const SettingButton = ({setWhiteTime, setBlackTime}) => {
     return (
         <>
             <form onClick={() => setOpen(o => !o)}>
-                <SettingButtonImage style={{ width: "100%", height: "100%" ,cursor: "pointer"}} />
+                <SettingButtonImage style={{ width: "50px", height: "50px" ,cursor: "pointer"}} />
             </form>
             <StyledPopup open={open} modal onClose={closeModal}>
                 <Modal>

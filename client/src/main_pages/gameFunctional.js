@@ -4,8 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import { SettingButton } from "../styled_components/settingButton";
 import { Logo } from "../styled_components"
 import { GameWrapper, RoomCode as RoomCodeButton, NonChessboard } from "../styled_components/gameComponents"
-import { Ratings, Gameover } from "../items/display_components.js";
-import { GameControls } from "../items/interactive_components";
 import { MatchClock } from "../items/matchClock.js";
 import { usePlayerContext } from '../contexts/PlayerContext';
 import {
@@ -14,6 +12,10 @@ import {
 } from "../handlers/socket_handlers.js";
 import { sendRating, squareStyling } from "../handlers/helpers.js"
 import TeamRoster from "../items/teamRoster.js";
+import styled from 'styled-components';
+import { Ratings, Gameover } from "../items/display_components.js";
+import { GameControls, TurnDisplay } from "../items/interactive_components.js";
+
 
 console.log("Game functional loaded")
 
@@ -142,50 +144,59 @@ const Game = () => {
     }).then(() => engineGame().evalMove());
   };
 
-  return (
-
-    <GameWrapper>
-      <Chessboard
-        id="board!"
-        position={fen}
-        onDrop={onDrop}
-        boardStyle={boardStyle}
-        orientation={isWhite ? "white" : "black"}
-        calcWidth={(screen) => Math.min(screen.screenHeight * .9, screen.screenWidth * .53)}
-        squareStyles={squareStyles}
-      />
-
-      <NonChessboard>
-
-        <Logo style={{ width: "50%", height: "auto" }}></Logo>
-        <TeamRoster  whiteTeam = {whiteTeam} blackTeam = {blackTeam} gameStarted = {gameStarted} />
+  const GameStateDisplay = () => {
+    return (
+      <GameStateDisplayWrapper>
         <Ratings team={isWhite ? whiteTeam : blackTeam} gameStarted={gameStarted} />
-
-        {/*display of these depend on the state of the game*/}
         <GameControls gameStarted={gameStarted} socket={socket} roomCode={roomCode} host={host}
           isWhite={isWhite} username={username} setIsWhite={setIsWhite} />
-        <h1 style={{ color: "#FFFFFF", fontFamily: "Montserrat", fontSize: "1.5rem" }}>{turn ? "Your" : "Not Your"} Turn</h1>
+        <TurnDisplay gameStarted={gameStarted} turn={turn} />
         <h1 style={{ color: "#FFFFFF" }}>
           <Gameover isCheckmate={isCheckmate} timeOut={timeOut} whiteTurn={whiteTurn} />
         </h1>
+      </GameStateDisplayWrapper>
+    )
+  }
 
-        <section id="footer" style={{ display: "flex", width: "100%", margin: "0 0 34px 34px", 'justifyContent': 'start', 'gap': '5%' }}>
-          <SettingButton setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} socket={socket} />
-          <RoomCodeButton>ROOM: {roomCode}</RoomCodeButton>
-          <MatchClock whiteTime={whiteTime} blackTime={blackTime} whiteTurn={whiteTurn} gameStarted={gameStarted} />
-        </section>
+  return (
 
-      </NonChessboard>
+    <GameWrapper>
+      <div style={{ gridArea: "chessboard" }}>
+        <Chessboard
+          id="board!"
+          position={fen}
+          onDrop={onDrop}
+          boardStyle={BoardStyle}
+          orientation={isWhite ? "white" : "black"}
+          calcWidth={(screen) => screen.screenHeight * .9}
+          squareStyles={squareStyles}
+        />
+      </div>
+      <Logo style={{ gridArea: "logo", height: "100px", width: "auto" }}></Logo>
+      <TeamRoster whiteTeam={whiteTeam} blackTeam={blackTeam} gameStarted={gameStarted} />
+      <GameStateDisplay />
+      <Footer>
+        <SettingButton setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} socket={socket} /> 
+        <RoomCodeButton>ROOM: {roomCode}</RoomCodeButton>
+        <MatchClock whiteTime={whiteTime} blackTime={blackTime} whiteTurn={whiteTurn} gameStarted={gameStarted} />
+      </Footer>
 
     </GameWrapper>
-
 
   );
 }
 
-export default Game;
+const Footer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items:center;
+  width: 100%;
+  height: 100%;
+  gap: 3%;
+  grid-area: footer;
+`;
 
-const boardStyle = {
+const BoardStyle = {
   border: "10px solid #868BAC",
   boxShadow: `0 5px 15px rgba(0, 0, 0, 0.5)`,
   "border-radius": "5px",
@@ -193,3 +204,8 @@ const boardStyle = {
   left: "5%"
 };
 
+const GameStateDisplayWrapper = styled.div`
+  grid-area: control;
+`;
+
+export default Game;

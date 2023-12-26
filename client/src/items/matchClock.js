@@ -53,17 +53,15 @@ const Digits = styled.div`
   text-align:center;
   height:100%;
   width:50%;
-  fontSize: 50px;
-  background:#FFFFFF
+  background:#FFFFFF;
   `
-
 
 const MatchClockWrapper = styled.div`
   display:flex;
-  height: 100%;
-  width: 30%;
-  justifyContent: "center";
-  alignItems: "center;;
+  height: 56px;
+  width: 130px;
+  justify-content: "center";
+  align-items: "center";
 `
 
 // div style={{ display: "flex", height: "8%", width: "30%", justifyContent: "center", alignItems: "center" }}

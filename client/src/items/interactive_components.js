@@ -15,12 +15,18 @@ const StartGameButton = ({ socket, roomCode }) => {
 
 export const GameControls = ({ gameStarted,socket, roomCode, host, isWhite, username, setIsWhite }) => {
     if (!gameStarted) return (
-        <div style={{ display: "flex", justifyContent: "space-evenly", width: "70%", height: "9%" }}>
+        <div style={{ display: "flex", gap:"5%", justifyContent: "center", width: "100%", height: "100%" }}>
             {host && <StartGameButton socket={socket} roomCode={roomCode} />}
             <ChangeTeam team="white" onClick={(e) => changeTeam(socket, isWhite, roomCode, username, setIsWhite)} >CHANGE TEAM</ChangeTeam>
         </div>
     )
 };
+
+export const TurnDisplay = ({gameStarted, turn}) =>{
+    if (gameStarted) return (
+    <h1 style={{ color: "#FFFFFF", fontFamily: "Montserrat", fontSize: "1.5rem" }}>{turn ? "Your" : "Not Your"} Turn</h1>
+    )
+}
 
 export const InstructionButton = () => {
     const [open, setOpen] = useState(false);

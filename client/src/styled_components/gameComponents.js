@@ -2,20 +2,39 @@ import styled from 'styled-components';
 import { Button } from "./index.js";
 
 export const GameWrapper = styled.div`
-display:flex;
-flex-direction: column;
-align-items:center;
+display: grid;
+grid-template:
+    "logo chessboard" 1fr
+    "roster chessboard" 1fr 
+    "roster chessboard" 1fr
+    "control chessboard" 1fr
+    "footer chessboard" 1fr 
+    / 1fr 2fr;
 margin:0;
 padding:0;
 background-color: rgb(38,40,56,0.93);
 height:100vh;
-flex-flow:row-reverse;
-justify-content:space-evenly;
-max-width: 1800px;
 width: 100vw;
-
-
+max-width: 1800px;
+justify-items: center;
+align-items: center;
 `;
+
+// export const GameWrapper = styled.div`
+// display:flex;
+// flex-direction: column;
+// align-items:center;
+// margin:0;
+// padding:0;
+// background-color: rgb(38,40,56,0.93);
+// height:100vh;
+// flex-flow:row-reverse;
+// justify-content:space-evenly;
+// max-width: 1800px;
+// width: 100vw;
+// `;
+
+
 
 export const GameplaySection = styled.section`
 display: flex;
@@ -33,8 +52,8 @@ pointer-events:none;
 `;
 
 export const ChangeTeam = styled(Button)`
-height:100%;
-width: 30%;
+height:70px;
+width: 120px;
 border: 3px solid rgba(151, 154, 175, 0.93);
 background:${props => props.team ? "#E6E6E6" : "#939393"};
 color:${props => props.team ? "#979AAF" : "#FFFFFF"};
@@ -60,14 +79,14 @@ color:${props => props.color ? "#E6E6E6" : "#939393"};
 export const TeamSection = styled.section`
 display: flex;
 flex-direction: column;
-width: 50%; 
 align-items: center;
 justify-content: start;
 height: fit-content;
 `;
 
 export const StartGame = styled(Button)`
-width: 30%;
+height: 70px;
+width: 120px;
 background:#868BAC;
 `;
 

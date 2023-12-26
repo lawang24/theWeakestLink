@@ -22,6 +22,10 @@ console.log("Game functional loaded")
 const engine = new Worker("stockfish.js");
 const game = new Chess();
 
+// function chessBoardWidth(screen){
+//   return 
+// }
+
 const Game = () => {
   const [fen, setFen] = useState("start");
   const [turn, setTurn] = useState(false);
@@ -151,9 +155,7 @@ const Game = () => {
         <GameControls gameStarted={gameStarted} socket={socket} roomCode={roomCode} host={host}
           isWhite={isWhite} username={username} setIsWhite={setIsWhite} />
         <TurnDisplay gameStarted={gameStarted} turn={turn} />
-        <h1 style={{ color: "#FFFFFF" }}>
           <Gameover isCheckmate={isCheckmate} timeOut={timeOut} whiteTurn={whiteTurn} />
-        </h1>
       </GameStateDisplayWrapper>
     )
   }
@@ -161,22 +163,22 @@ const Game = () => {
   return (
 
     <GameWrapper>
-      <div style={{ gridArea: "chessboard" }}>
+      <ChessboardWrapper>
         <Chessboard
           id="board!"
           position={fen}
           onDrop={onDrop}
           boardStyle={BoardStyle}
           orientation={isWhite ? "white" : "black"}
-          calcWidth={(screen) => screen.screenHeight * .9}
+          calcWidth={(screen) => Math.min(screen.screenHeight, screen.screenWidth) * .9}
           squareStyles={squareStyles}
         />
-      </div>
-      <Logo style={{ gridArea: "logo", height: "100px", width: "auto" }}></Logo>
+      </ChessboardWrapper>
+      <Logo/>
       <TeamRoster whiteTeam={whiteTeam} blackTeam={blackTeam} gameStarted={gameStarted} />
       <GameStateDisplay />
       <Footer>
-        <SettingButton setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} socket={socket} /> 
+        <SettingButton setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} socket={socket} />
         <RoomCodeButton>ROOM: {roomCode}</RoomCodeButton>
         <MatchClock whiteTime={whiteTime} blackTime={blackTime} whiteTurn={whiteTurn} gameStarted={gameStarted} />
       </Footer>
@@ -197,15 +199,16 @@ const Footer = styled.div`
 `;
 
 const BoardStyle = {
-  border: "10px solid #868BAC",
-  boxShadow: `0 5px 15px rgba(0, 0, 0, 0.5)`,
-  "border-radius": "5px",
-  position: "relative",
-  left: "5%"
 };
 
 const GameStateDisplayWrapper = styled.div`
   grid-area: control;
 `;
+
+const ChessboardWrapper = styled.div`
+  border: 5px solid #868BAC;
+  border-radius: 5px;
+  grid-area: chessboard;
+`
 
 export default Game;

@@ -18,6 +18,14 @@ width: 100vw;
 max-width: 1800px;
 justify-items: center;
 align-items: center;
+@media screen and (width<=600px){
+    grid-template:
+    "footer logo" 1fr
+    "roster roster" 2fr
+    "control control" 1fr
+    "chessboard chessboard" 3fr
+    / 3fr 1fr
+}
 `;
 
 // export const GameWrapper = styled.div`
@@ -52,13 +60,13 @@ pointer-events:none;
 `;
 
 export const ChangeTeam = styled(Button)`
-height:70px;
+height:100%;
 width: 120px;
 border: 3px solid rgba(151, 154, 175, 0.93);
 background:${props => props.team ? "#E6E6E6" : "#939393"};
 color:${props => props.team ? "#979AAF" : "#FFFFFF"};
 margin:0;
-font-size:1vw;
+font-size:1rem;
 `;
 
 export const TeamName = styled.h2`
@@ -85,9 +93,10 @@ height: fit-content;
 `;
 
 export const StartGame = styled(Button)`
-height: 70px;
+height: 100%;
 width: 120px;
 background:#868BAC;
+font-size: 1rem;
 `;
 
 export const NonChessboard = styled.div`

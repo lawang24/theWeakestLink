@@ -28,7 +28,13 @@ cursor: pointer;
     transition-duration: 0.3s;
 }
 `;
-export const Logo = (props) => <img style={props.style} src={logo} alt="logo" />
+export const Logo = (props) => <LogoWrapper src={logo} alt="logo" />
 
+const LogoWrapper = styled.img`
+ grid-area: logo;
+ height: auto;
+ width: 100%;
+ max-width: 200px;
+`
 
 export const Arrow = (props) => <input type="image" style={props.style} src={backArrow} alt="backarrow" />

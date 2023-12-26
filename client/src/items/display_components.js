@@ -75,11 +75,20 @@ margin: 0 7px;
 `
 
 export const Gameover = ({isCheckmate, timeOut, whiteTurn}) => {
-  if (isCheckmate) {
-    return (<div>CHECKMATE BUCKO</div>);
-  }
-  if (timeOut) {
-    return (<div>{whiteTurn ? "BLACK" : "WHITE"} WINS ON TIME</div>);
-  }
+
+  if (!isCheckmate && !timeOut) return null;
+
+  const winner = whiteTurn ? "BLACK" : "WHITE"
+
+  const CheckMateMessage = `CHECKMATE! ${winner} WINS`;
+  const TimeOutMessage =`${winner} WINS ON TIME`;
+
+  return <EndingWrapper> {isCheckmate? CheckMateMessage : TimeOutMessage} </EndingWrapper> 
+  
 }
+
+const EndingWrapper = styled.div`
+  color: #FFFFFF;
+`
+
 

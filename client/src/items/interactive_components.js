@@ -13,14 +13,27 @@ const StartGameButton = ({ socket, roomCode }) => {
 };
 
 
-export const GameControls = ({ gameStarted,socket, roomCode, host, isWhite, username, setIsWhite }) => {
+export const GameControls = ({ gameStarted, socket, roomCode, host, isWhite, username, setIsWhite }) => {
     if (!gameStarted) return (
-        <div style={{ display: "flex", gap:"5%", justifyContent: "center", width: "100%", height: "100%" }}>
+        <GameControlsWrapper>
             {host && <StartGameButton socket={socket} roomCode={roomCode} />}
             <ChangeTeam team="white" onClick={(e) => changeTeam(socket, isWhite, roomCode, username, setIsWhite)} >CHANGE TEAM</ChangeTeam>
-        </div>
+        </GameControlsWrapper>
     )
 };
+
+const GameControlsWrapper = styled.div`
+  display: flex;
+  gap: 5%;
+  justify-content: center;
+  width: 100%;
+  height: 70px;
+
+  @media screen and (width < 600px){
+    height: 50px;
+  }
+`;
+
 
 export const TurnDisplay = ({gameStarted, turn}) =>{
     if (gameStarted) return (
@@ -48,73 +61,76 @@ export const InstructionButton = () => {
         </>
     )
 }
-const openAnimation = keyframes` {
-    0% {
-      transform: scale(1) translateY(0px);
-      opacity: 0;
-      box-shadow: 0 0 0 rgba(241, 241, 241, 0);
-    }
-    1% {
-      transform: scale(0.96) translateY(10px);
-      opacity: 0;
-      box-shadow: 0 0 0 rgba(241, 241, 241, 0);
-    }
-    100% {
-      transform: scale(1) translateY(0px);
-      opacity: 1;
-      box-shadow: 0 0 500px rgba(241, 241, 241, 0);
-    }
+
+const openAnimation = keyframes`
+  0% {
+    transform: scale(1) translateY(0px);
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(241, 241, 241, 0);
   }
-  `
+  1% {
+    transform: scale(0.96) translateY(10px);
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(241, 241, 241, 0);
+  }
+  100% {
+    transform: scale(1) translateY(0px);
+    opacity: 1;
+    box-shadow: 0 0 500px rgba(241, 241, 241, 0);
+  }
+`;
+
 const StyledPopup = styled(Popup)`
-    &-overlay{
-        background: rgba(0, 0, 0, 0.5);
-    }
-    &-content{
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        margin: 0;
-        border-radius: 10px;
-        background: #E5E5E5;
-        height: 50%;  
-        width: 50%;
-        padding: 5px;
-        text-align: center;
-        font-family: 'Montserrat';
-        font-style: normal;
-        font-weight:700;
-        font-size: 18px;
-        white-space: pre-line;
-        animation: ${openAnimation} 0.3s cubic-bezier(0.38, 0.1, 0.36, 0.9) forwards;
-    }
+  &-overlay {
+    background: rgba(0, 0, 0, 0.5);
+  }
+  &-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    border-radius: 10px;
+    background: #E5E5E5;
+    height: 50%;
+    width: 50%;
+    padding: 5px;
+    text-align: center;
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 18px;
+    white-space: pre-line;
+    animation: ${openAnimation} 0.3s cubic-bezier(0.38, 0.1, 0.36, 0.9) forwards;
+  }
 `;
 
 const Button = styled.button`
-height: 'fit-content';
-font-family: 'Montserrat';
-font-style: normal;
-font-weight:700;
-font-size: 20px;
-color:#FFFFFF;
-background-color: rgb(38,40,56,0.93);
-border: rgb(38,40,56,0.93);
-text-decoration-line: underline;
-text-decoration-thickness: 1.5px;
-text-decoration-skip-ink: none;
-text-underline-offset: .2em;
-cursor: pointer;
-margin-top: 1%;
-`
+  height: fit-content;
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 20px;
+  color: #FFFFFF;
+  background-color: rgba(38, 40, 56, 0.93);
+  border: none;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1.5px;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+  margin-top: 1%;
+`;
+
 const ExitInstruction = styled.a`
-    position: absolute;
-    top: 0px;
-    right: 0px;
-`
+  position: absolute;
+  top: 0px;
+  right: 0px;
+`;
+
 const Modal = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content:center;
-    align-items:center;
-    height:100%
-`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+`;

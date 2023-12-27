@@ -5,11 +5,13 @@ import './App.css'
 import { Wrapper } from './styled_components/index.js';
 import { PlayerProvider, usePlayerContext } from './contexts/PlayerContext.js';
 
-// const socket = io('https://weakestlinkserver.herokuapp.com'); 
-const socket = io('http://localhost:3001');
+const socket = io(window.location.hostname === "localhost" ?
+  'http://localhost:3001' :
+  'https://weakestlinkserver.herokuapp.com');
+
 
 const AppContent = () => {
-  const {isInRoom } = usePlayerContext();
+  const { isInRoom } = usePlayerContext();
   return isInRoom ? <Game /> : <JoinRoom />;
 }
 
@@ -17,7 +19,7 @@ const App = () => {
   return (
     <Wrapper>
       <PlayerProvider socket={socket}>
-        <AppContent/>
+        <AppContent />
       </PlayerProvider>
     </Wrapper>
   );

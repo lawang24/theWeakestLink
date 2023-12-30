@@ -38,21 +38,30 @@ export default MainLobbyPortal;
 
 const ControlPanelWrapper = styled.div`
 display:flex;
-flex-direction:row;
 justify-content:space-between;
 height:25vh;
-width:39vw;
+width: 70%;
+max-width: 700px;
 border-radius: 15px;
 position:relative;
+gap: 20px;
+
+@media screen and (width<600px){
+  flex-direction:column;
+  width: 90%;
+  height: 50%;
+}
+
 `;
 
 const ControlPanelButton = styled.div`
 display:flex;
 background-color: #868BAC;
-width:46%;
+flex: 1;
 justify-content:center;
 box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 border-radius: 15px;
+
 `;
 
 const Form = styled.form`
@@ -69,7 +78,7 @@ background:#E5E5E5;
 height:26%;
 width:100%;
 padding: 0;
-margin-bottom:10%;
+margin-bottom:15px;
 border-width: 0;
 font-family: 'Montserrat';
 font-style: normal;

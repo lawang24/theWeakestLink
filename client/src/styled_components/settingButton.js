@@ -18,7 +18,7 @@ export const SettingButton = ({setWhiteTime, setBlackTime}) => {
             <StyledPopup open={open} modal onClose={closeModal}>
                 <Modal>
                     <ExitInstruction className="close" onClick={closeModal}>&times;</ExitInstruction>
-                    <TimeFormat setWhiteTime = {setWhiteTime} setBlackTime = {setBlackTime}/>
+                    {/* <TimeFormat setWhiteTime = {setWhiteTime} setBlackTime = {setBlackTime}/> */}
                 </Modal>
             </StyledPopup>
         </>
@@ -82,50 +82,3 @@ const Modal = styled.div`
 
 
 
-const TimeFormat = ({setWhiteTime, setBlackTime, whiteTime}) =>{
-    const [timeFormat, setTimeFormat] = useState(0);
-
-    const {socket,roomCode} = usePlayerContext();
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        socket.emit("set_time_format", roomCode, timeFormat*60);
-        setWhiteTime(timeFormat)
-        setBlackTime(timeFormat)
-    }
-
-    return(
-        <form onSubmit={handleSubmit}>
-        <TimeFormatWrapper>
-            <h2>Time Format (Minutes)</h2>
-            <TimeFormatInput value = {whiteTime} onChange={e => setTimeFormat(e.target.value)} />
-        </TimeFormatWrapper>
-        <SettingsSubmitButton type = "submit">Change Time Format</SettingsSubmitButton>
-        </form>
-    )
-
-}
-
-const TimeFormatWrapper = styled.div`
-    display:flex;
-    gap: 15px;
-    align-items: center;
-`
-
-const SettingsSubmitButton = styled.button`
-    font-size: 1rem;
-    padding: 10px 15px;
-    cursor: pointer;
-`
-
-const TimeFormatInput = styled.input`
-background:#E5E5E5;
-width:100px;
-padding: 5px 0;
-border-width: 1px;
-border-radius 5px;
-font-family: 'Montserrat';
-font-size: 1.5rem;
-font-weight:700;
-text-align:center;
-`;

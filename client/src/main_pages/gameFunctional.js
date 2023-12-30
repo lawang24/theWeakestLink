@@ -15,6 +15,7 @@ import TeamRoster from "../items/teamRoster.js";
 import styled from 'styled-components';
 import { Ratings, Gameover } from "../items/display_components.js";
 import { GameControls, TurnDisplay } from "../items/interactive_components.js";
+import Settings from "../items/settingsMenu.js";
 
 
 console.log("Game functional loaded")
@@ -127,7 +128,7 @@ const Game = () => {
 
   const onDrop = ({ sourceSquare, targetSquare }) => {
 
-    if (!turn || !canSubmitMove) return;
+    // if (!turn || !canSubmitMove) return;
     const move = game.move({ from: sourceSquare, to: targetSquare })
     if (move === null) return; // illegal move  
     console.log(game.fen());
@@ -178,7 +179,8 @@ const Game = () => {
       <TeamRoster whiteTeam={whiteTeam} blackTeam={blackTeam} gameStarted={gameStarted} />
       <GameStateDisplay />
       <Footer>
-        <SettingButton setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} socket={socket} />
+        {/* <SettingButton setWhiteTime={setWhiteTime} setBlackTime={setBlackTime} socket={socket} /> */}
+        <Settings/>
         <RoomCodeButton>ROOM: {roomCode}</RoomCodeButton>
         <MatchClock whiteTime={whiteTime} blackTime={blackTime} whiteTurn={whiteTurn} gameStarted={gameStarted} />
       </Footer>

@@ -8,7 +8,7 @@ export const room_joined_handler = (socket, setRoomCode, setIsWhite) => {
 };
 
 export const next_turn_handler = (socket, game, setFen, setIsCheckmate, setGameStarted,
-  setWhiteTurn, setTurn, isWhite, setCanSubmitMove, roomCode, setHistory, setSquareStyles) => {
+  setWhiteTurn, setTurn, isWhite, setCanSubmitMove, roomCode, setSquareStyles) => {
 
   socket.on("next_turn", (worst_fen, nowWhiteTurn, target_square, source_square) => {
     setFen(worst_fen);

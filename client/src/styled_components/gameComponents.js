@@ -1,32 +1,7 @@
 import styled from 'styled-components';
 import { Button } from "./index.js";
 
-export const GameWrapper = styled.div`
-display: grid;
-grid-template:
-    "logo chessboard" 1fr
-    "roster chessboard" 1fr 
-    "roster chessboard" 1fr
-    "control chessboard" 1fr
-    "footer chessboard" 1fr 
-    / 1fr 2fr;
-margin:0;
-padding:0;
-background-color: rgb(38,40,56,0.93);
-height:100vh;
-width: 100vw;
-max-width: 1800px;
-justify-items: center;
-align-items: center;
-@media screen and (width<=600px){
-    grid-template:
-    "footer logo" 1fr
-    "roster roster" 2fr
-    "control control" 1fr
-    "chessboard chessboard" 3fr
-    / 3fr 1fr
-}
-`;
+
 
 // export const GameWrapper = styled.div`
 // display:flex;

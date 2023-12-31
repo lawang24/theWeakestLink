@@ -1,25 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import TimeFormat from './timeFormatter';
+import GearImage from '../images/settingGear.png'
 
 const DropdownContainer = styled.div`
-    position: relative;
     display: inline-block;
+    position: relative;
 `;
 
 const DropdownButton = styled.button`
-    /* Style your button */
+    background: url(${GearImage}) no-repeat center/cover transparent;
+    height: 56px;
+    width: 56px;  
+    border: 0;
+    cursor: pointer;
 `;
 
 const DropdownContent = styled.div`
     display: ${props => props.isVisible ? 'block' : 'none'};
     position: absolute;
-    bottom: 100%; /* Positions the dropdown above the button */
+    bottom: 110%; /* Positions the dropdown above the button */
     left: 0;
     background-color: #f9f9f9;
     min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
+    z-index: 1000;
+    border-radius: 10px;
+    padding: 20px;
+
+    @media screen and (width<=600px){
+        top: 110%;
+        bottom: auto;
+    }
+    
     /* Additional styling as needed */
 `;
 
@@ -46,7 +58,7 @@ const Settings = () => {
 
     return (
         <DropdownContainer ref={dropdownRef}>
-            <DropdownButton onClick={toggleDropdown}>Settings</DropdownButton>
+            <DropdownButton onClick={toggleDropdown}/>
             <DropdownContent isVisible={isVisible}>
                 <TimeFormat/>
             </DropdownContent>

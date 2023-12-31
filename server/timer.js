@@ -22,7 +22,6 @@ class Timer {
                 clearInterval(this.#timer);
                 callback(io, roomCode);
             }
-        console.log(this.getTimer());
         }, 1000);
     };
 
@@ -39,7 +38,6 @@ class Timer {
                 clearInterval(this.#timer);
                 callback(io, roomCode);
             }
-            console.log(this.getTimer());
         }, 1000);
     };
 

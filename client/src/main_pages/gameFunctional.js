@@ -1,9 +1,8 @@
 import Chessboard from "chessboardjsx";
 import { Chess } from "chess.js";
 import { useState, useEffect, useRef } from "react";
-import { SettingButton } from "../styled_components/settingButton";
 import { Logo } from "../styled_components"
-import { GameWrapper, RoomCode as RoomCodeButton, NonChessboard } from "../styled_components/gameComponents"
+import { RoomCode as RoomCodeButton } from "../styled_components/gameComponents"
 import { MatchClock } from "../items/matchClock.js";
 import { usePlayerContext } from '../contexts/PlayerContext';
 import {
@@ -39,7 +38,6 @@ const Game = () => {
   const [blackTime, setBlackTime] = useState(50);
   const [whiteTeam, setWhiteTeam] = useState(new Map());
   const [blackTeam, setBlackTeam] = useState(new Map());
-  const [history, setHistory] = useState([]);
   const [squareStyles, setSquareStyles] = useState({});
   const proposedMove = useRef("");
   const target = useRef("");
@@ -60,7 +58,7 @@ const Game = () => {
     room_joined_handler(socket, setRoomCode, setIsWhite);
 
     next_turn_handler(socket, game, setFen, setIsCheckmate, setGameStarted,
-      setWhiteTurn, setTurn, isWhite, setCanSubmitMove, roomCode, setHistory, setSquareStyles);
+      setWhiteTurn, setTurn, isWhite, setCanSubmitMove, roomCode, setSquareStyles);
 
     update_teams_handler(socket, setWhiteTeam, setBlackTeam);
 
@@ -128,7 +126,7 @@ const Game = () => {
 
   const onDrop = ({ sourceSquare, targetSquare }) => {
 
-    // if (!turn || !canSubmitMove) return;
+    if (!turn || !canSubmitMove) return;
     const move = game.move({ from: sourceSquare, to: targetSquare })
     if (move === null) return; // illegal move  
     console.log(game.fen());
@@ -212,5 +210,37 @@ const ChessboardWrapper = styled.div`
   border-radius: 5px;
   grid-area: chessboard;
 `
+
+const GameWrapper = styled.div`
+display: grid;
+position: relative;
+grid-template:
+    "logo chessboard" 1fr
+    "roster chessboard" 1fr 
+    "roster chessboard" 1fr
+    "control chessboard" 1fr
+    "footer chessboard" 1fr 
+    / 1fr 2fr;
+margin:0;
+padding:0;
+background-color: rgb(38,40,56,0.93);
+height:100vh;
+width: 100vw;
+max-width: 1800px;
+justify-items: center;
+align-items: center;
+box-sizing: border-box;
+
+@media screen and (width<=600px){
+    grid-template:
+    "footer logo" 1fr
+    "roster roster" 2fr
+    "control control" 1fr
+    "chessboard chessboard" 3fr
+    / 3fr 1fr;
+    padding: 5px 0 15px 0;
+
+}
+`;
 
 export default Game;

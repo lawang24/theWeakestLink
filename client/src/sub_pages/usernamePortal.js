@@ -64,6 +64,12 @@ height:25vh;
 justify-content:space-between;
 flex-direction:row;
 align-items:center;
+
+@media screen and (width<600px){
+  flex-direction:column;
+  width: 90%;
+  height: 30%;
+}
 `;
 
 const BackButton = styled.form`
@@ -72,7 +78,12 @@ left:-20%;
 display:flex;
 justify-content: center;
 height:15%;
-width:auto.
+width:auto;
+
+@media screen and (width<600px){
+  left: 5%;
+  top: 42.5%;
+}
 `;
 
 const UsernameForm = styled.form`

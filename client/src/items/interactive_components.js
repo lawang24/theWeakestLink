@@ -50,12 +50,10 @@ export const InstructionButton = () => {
             <Button onClick={() => setOpen(o => !o)}> How To Play </Button>
             <StyledPopup open={open} modal onClose={closeModal}>
                 <Modal>
-                    <ExitInstruction className="close" onClick={closeModal}>&times;</ExitInstruction>
-                    <p>The rules are simple and similar to chess except for a few rules: </p>
-                    <p>1. Split into two teams.</p>
-                    <p>2. On your turn, every player on the team will vote for a move.</p>
-                    <p>3. The worst move &#40;~Stockfish&#41; is brought forth to represent the team. </p>
-                    <p> Have fun! </p>
+                    <p>Team Chess! </p>
+                    <p>1. On your team's turn, every player on the team will vote for a move.</p>
+                    <p>2. The worst move &#40;Stockfish judging&#41; is brought forth to represent the team. </p>
+                    <p>3. Victory. </p>
                 </Modal>
             </StyledPopup>
         </>
@@ -101,6 +99,12 @@ const StyledPopup = styled(Popup)`
     font-size: 18px;
     white-space: pre-line;
     animation: ${openAnimation} 0.3s cubic-bezier(0.38, 0.1, 0.36, 0.9) forwards;
+
+    @media screen and (width<=600px){
+        width:80%;
+        height: 80%;
+    }
+    
   }
 `;
 
@@ -134,3 +138,4 @@ const Modal = styled.div`
   align-items: center;
   height: 100%;
 `;
+

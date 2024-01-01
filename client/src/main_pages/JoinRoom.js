@@ -32,19 +32,23 @@ function JoinRoom() {
   }
 
   return (
-    <Wrapper>
+    <JoinRoomWrapper>
       <Logo style={{ height: "20%", width: "auto" }}></Logo>
       <Description>A TEAM-BASED CHESS GAME</Description>
       {isHomescreen ?
         <MainLobbyPortal isRoomValid={isRoomValid} setisHomescreen={setisHomescreen} /> :
         <UsernamePortal setisHomescreen={setisHomescreen} />
       }
-      <InstructionButton/>
-    </Wrapper>
+      <InstructionButton />
+    </JoinRoomWrapper>
   );
 };
 
 export default JoinRoom;
+
+const JoinRoomWrapper = styled(Wrapper)`
+  justify-content:center;
+`;
 
 const Description = styled.h2`
 font-family: 'Montserrat';

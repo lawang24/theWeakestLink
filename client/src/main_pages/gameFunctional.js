@@ -226,7 +226,6 @@ padding:0;
 background-color: rgb(38,40,56,0.93);
 height:100dvh;
 width: 100dvw;
-overflow-y:hidden;
 max-width: 1800px;
 justify-items: center;
 align-items: center;

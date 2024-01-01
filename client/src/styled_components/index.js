@@ -11,8 +11,8 @@ justify-content:center;
 margin:0;
 padding:0;
 background-color: rgb(38,40,56,0.93);
-height:100vh;
-width:100vw;
+height:100dvh;
+width:100dvw;
 `;
 export const Button = styled.button`
 background:#565656;

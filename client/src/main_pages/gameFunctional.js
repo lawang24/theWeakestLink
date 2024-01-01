@@ -224,8 +224,8 @@ grid-template:
 margin:0;
 padding:0;
 background-color: rgb(38,40,56,0.93);
-height:100dvh;
-width: 100dvw;
+height:100%;
+width: 100%;
 max-width: 1800px;
 justify-items: center;
 align-items: center;

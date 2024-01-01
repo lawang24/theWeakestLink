@@ -1,10 +1,9 @@
 import io from 'socket.io-client';
 import Game from "./main_pages/gameFunctional.js"
 import JoinRoom from "./main_pages/JoinRoom.js"
-import './App.css'
+import './styles.css'
 import { Wrapper } from './styled_components/index.js';
 import { PlayerProvider, usePlayerContext } from './contexts/PlayerContext.js';
-import './globalStyles.css';
 
 const socket = io(window.location.hostname === "localhost" ?
   'http://localhost:3001' :

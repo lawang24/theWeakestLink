@@ -15,10 +15,6 @@ body{
   padding: 0;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
@@ -41,11 +37,5 @@ body{
 *::before,
 *::after {
   box-sizing: border-box;
-}
-
-html, body{
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
 }
 

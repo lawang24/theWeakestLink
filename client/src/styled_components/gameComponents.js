@@ -9,7 +9,7 @@ import { Button } from "./index.js";
 // align-items:center;
 // margin:0;
 // padding:0;
-// background-color: rgb(38,40,56,0.93);
+// background-color: rgb(38,40,56);
 // height:100vh;
 // flex-flow:row-reverse;
 // justify-content:space-evenly;

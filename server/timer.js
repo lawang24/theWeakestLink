@@ -1,14 +1,21 @@
 class Timer {
     #timeLeft;
     #timer;
+    #startingTime;
 
     constructor(times) {
         this.#timeLeft = [...times]; // W , B 5 minutes default
+        this.#startingTime = times[0]
     }
 
     setTimer(times) {
         this.#timeLeft = [...times];
+        this.#startingTime = times[0]
     };
+
+    resetTimer() {
+        this.#timeLeft = [this.#startingTime,this.#startingTime]
+    }
 
     getTimer() {
         return this.#timeLeft;

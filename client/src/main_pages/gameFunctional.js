@@ -223,7 +223,7 @@ grid-template:
     / 1fr 2fr;
 margin:0;
 padding:0;
-background-color: rgb(38,40,56,0.93);
+background-color: rgb(38,40,56);
 height:100%;
 width: 100%;
 max-width: 1800px;

@@ -145,7 +145,7 @@ export const stop_game_handler = (io, socket, rooms) => {
     socket.on("stop_game", (roomCode) => {
         const this_room = rooms.get(roomCode);
         this_room.timer.stopTimer();
-        this_room.timer.setTimer(time_format);
+        this_room.timer.resetTimer()
         io.to(roomCode).emit("update_timer", this_room.timer.getTimer());
     });
 }
@@ -173,7 +173,6 @@ export const disconnection_handler = (io, socket, rooms) => {
     });
 }
 
-//
 const time_out = (io, roomCode) => {
     io.to(roomCode).emit("time_out");
 }

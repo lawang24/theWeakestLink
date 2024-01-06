@@ -89,6 +89,10 @@ export const Gameover = ({isCheckmate, timeOut, whiteTurn}) => {
 
 const EndingWrapper = styled.div`
   color: #FFFFFF;
+  font-family: Montserrat;
+  font-size: 1rem;
+  text-align: center;
+  margin-top: 10px;
 `
 
 

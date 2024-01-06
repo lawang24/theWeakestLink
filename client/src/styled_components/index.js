@@ -10,7 +10,7 @@ align-items:center;
 justify-content:start;
 margin:0;
 padding:0;
-background-color: rgb(38,40,56,0.93);
+background-color: rgb(38,40,56);
 height:100svh;
 width:100svw;
 `;

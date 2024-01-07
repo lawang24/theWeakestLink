@@ -27,11 +27,10 @@ export function findWeakestPlayer(team) {
         let [moveType, score] = player.move_rating.split(' ');
         score = parseInt(score);
 
-
         // mate in 0 is overriden and gg
         const isFirstPlayer = weakestPlayerInfo.score === null;
         const isCurrentMoveTypeM = moveType === 'm';
-        const isWeakestMoveTypeC = weakestPlayerInfo.moveType === 'c';
+        const isWeakestMoveTypeC = weakestPlayerInfo.moveType === 'cp';
         const isNewWeakestForM = isCurrentMoveTypeM && (isWeakestMoveTypeC || score < weakestPlayerInfo.score);
         const isNewWeakestForC = !isCurrentMoveTypeM && (isWeakestMoveTypeC && score > weakestPlayerInfo.score);
 

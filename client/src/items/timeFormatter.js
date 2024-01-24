@@ -15,7 +15,7 @@ export const TimeFormat = () => {
     return (
         <form onSubmit={handleSubmit}>
             <TimeFormatWrapper>
-                <h2>Time Format (Minutes)</h2>
+                <h2>Duration (Minutes)</h2>
                 <TimeFormatInput onChange={e => setTimeFormat(e.target.value)} />
             </TimeFormatWrapper>
             <SettingsSubmitButton type="submit">Change Time Format</SettingsSubmitButton>
@@ -30,6 +30,7 @@ const TimeFormatWrapper = styled.div`
     display:flex;
     gap: 15px;
     align-items: center;
+    font-family: 'Montserrat';
 `
 
 const SettingsSubmitButton = styled.button`
@@ -39,13 +40,12 @@ const SettingsSubmitButton = styled.button`
 `
 
 const TimeFormatInput = styled.input`
-background:#E5E5E5;
-width:100px;
-padding: 5px 0;
-border-width: 1px;
-border-radius: 5px;
-font-family: 'Montserrat';
-font-size: 1.5rem;
-font-weight:700;
-text-align:center;
+    background:#E5E5E5;
+    width:100px;
+    padding: 5px 0;
+    border-width: 1px;
+    border-radius: 5px;
+    font-size: 1.5rem;
+    font-weight:700;
+    text-align:center;
 `;

@@ -7,6 +7,7 @@ const Tower = (props) => {
   else return <img style={props.style} src={blackTower} alt="logo" />
 }
 
+// team is a Map of username, Player pairs
 export const Teams = ({ team, isWhite, gameStarted }) => {
 
   if (!team) return;
@@ -19,14 +20,28 @@ export const Teams = ({ team, isWhite, gameStarted }) => {
   return (
     <Members>
       {Array.from(team, ([username, information]) => (
-        <div style={{ display: "flex", width: "100%", justifyContent: "start", height: "fit-content", marginBottom: "10px" }} key={username}>
+        <PlayerWrapper key = {username} is_highlighted = {information.is_highlighted}>
           <Icon player={information} />
-          <li style={{ color: "#FFFFFF", height: "fit-content" }}> {username} </li>
-        </div>
+          <Username >{username}</Username>
+        </PlayerWrapper>
       ))}
     </Members>
   )
 }
+
+const PlayerWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: start;
+  height: fit-content;
+  margin-bottom: 10px;
+  color: ${props => props.is_highlighted ? 'red' : 'white'};
+`;
+
+
+const Username = styled.li`
+  height: fit-content;
+`
 
 const Members = styled.ul`
 display: flex;
@@ -43,7 +58,6 @@ font-weight: 600;
 font-size: 18px;
 `;
 const ScoreNumber = styled.li`
-color: #FFFFFF;
 height: fit-content;
 margin-right: 10px;
 `

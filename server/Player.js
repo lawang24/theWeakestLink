@@ -7,6 +7,7 @@ export class Player {
         this._scorecard = 0;
         this._target_square = "";
         this._source_square = "";
+        this._is_highlighted = false;
     }
 
     get move_rating() {

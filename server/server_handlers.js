@@ -1,7 +1,7 @@
 import { newPlayer, makeid, reset_scorecards } from "./helpers.js";
 import Timer from "./timer.js";
 import { Player } from "./Player.js";
-import { findWeakestPlayer } from "./helpers.js";
+import { findWeakestPlayers } from "./helpers.js";
 
 const time_format = [50, 50];
 
@@ -24,13 +24,25 @@ export const process_move_handler = (io, socket, rooms) => {
         // triggers once everyone's votes are in
         if (team.size != 0 && team.size === this_room.moves_submitted) {
 
+            // clear highlights
+            for (player in team.values()){
+                player.is_highlighted = false
+            }
+
             // update room state
-            const weakestPlayerInfo = findWeakestPlayer(team);
-            const weakest_player = team.get(weakestPlayerInfo.username);
-            const worst_fen = weakest_player._move_fen;
-            const target_square = weakest_player._target_square;
-            const source_square = weakest_player._source_square;
-            weakest_player._scorecard++;
+            const weakestPlayers = findWeakestPlayers(team);
+
+            weakestPlayers.forEach(({username,moveType,score})=> {
+                const player = team.get(username);
+                player._scorecard++;
+                player.is_highlighted = true;
+            });
+
+            // take data from an arbitrary player from the weakest (they should be the same by rule logic)
+            const sample_player = team.get(weakestPlayers[0].username);
+            const worst_fen = sample_player._move_fen;
+            const target_square = sample_player._target_square;
+            const source_square = sample_player._source_square;
 
             this_room.whiteTurn = !this_room.whiteTurn;
             this_room.moves_submitted = 0;

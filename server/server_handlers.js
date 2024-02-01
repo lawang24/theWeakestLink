@@ -24,9 +24,6 @@ export const process_move_handler = (io, socket, rooms) => {
         // triggers once everyone's votes are in
         if (team.size != 0 && team.size === this_room.moves_submitted) {
 
-            console.log(JSON.stringify(...team))
-            console.log(team.size)
-
             // clear highlights
             for (const player of team.values()){
                 player.is_highlighted = false

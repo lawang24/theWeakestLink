@@ -17,15 +17,18 @@ export const process_move_handler = (io, socket, rooms) => {
 
         this_room.moves_submitted++;
 
-        // update highlighting
+        // update board highlighting
         player._source_square = source;
         player._target_square = target;
 
         // triggers once everyone's votes are in
         if (team.size != 0 && team.size === this_room.moves_submitted) {
 
+            console.log(JSON.stringify(...team))
+            console.log(team.size)
+
             // clear highlights
-            for (player in team.values()){
+            for (const player of team.values()){
                 player.is_highlighted = false
             }
 
@@ -63,7 +66,7 @@ export const process_move_handler = (io, socket, rooms) => {
     });
 };
 
-export const join_room_handler = (io, socket, rooms) => {
+export const join_room_handler = (io, socket, rooms,) => {
     socket.on("join_room", (roomCode, username) => {
         socket.join(roomCode);
         const this_room = rooms.get(roomCode);
@@ -166,8 +169,10 @@ export const disconnection_handler = (io, socket, rooms) => {
 
     socket.on("disconnecting", () => {
         const roomCode = Array.from(socket.rooms).pop();
-        const playerCount = (io.sockets.adapter.rooms.get(roomCode).size); // number of players in room
+        
 
+
+        const playerCount = (io.sockets.adapter.rooms.get(roomCode).size); // number of players in room
         // free memory if everyone has disconnected from the room
         if (playerCount == 1 && rooms.has(roomCode)) {
             const room = rooms.get(roomCode);

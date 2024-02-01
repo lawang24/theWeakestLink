@@ -35,7 +35,7 @@ const PlayerWrapper = styled.div`
   justify-content: start;
   height: fit-content;
   margin-bottom: 10px;
-  color: ${props => props.is_highlighted ? 'red' : 'white'};
+  color: ${props => props.is_highlighted ? 'green' : 'white'};
 `;
 
 
